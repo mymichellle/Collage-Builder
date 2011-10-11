@@ -10,6 +10,7 @@
 #include "BaseElement.h"
 #include <stdlib.h>
 #include <iostream>
+#include <math.h>
 
 BaseElement::BaseElement()
 {
@@ -19,23 +20,26 @@ BaseElement::BaseElement()
     width = 10;
     height = 10;
     color = new BaseColor(0,0,0,0);
-    rotation = 0;
+    rotation = 15;
+    bounds = new BoundingBox(x, y, width, height, rotation);
     
+    // Movement properties
     selected = false;
     moveable = false;
     startX = 0;
     startY = 0;
     
     // Initialize the corners
-    setCorners();
+    selectedCorner = CNONE;
 }
 
-void BaseElement::setCorners()
+// Updateing the bounds takes a lot of calculations
+// Only call after a movement/resize/rotation is final
+void BaseElement::updateBounds()
 {
-    corners[CBL] = new CornerBox(x, y);
-    corners[CBR] = new CornerBox(x+width, y);
-    corners[CTR] = new CornerBox(x+width, y+height);
-    corners[CTL] = new CornerBox(x, y+height);
+    bounds->setOrigin(x,y);
+    bounds->setDimensions(width, height);
+    bounds->setAngle(rotation);
 }
 
 void BaseElement::setPosition(int xpos, int ypos)
@@ -46,15 +50,14 @@ void BaseElement::setPosition(int xpos, int ypos)
 
 void BaseElement::setWidth(int w, bool locked)
 {
+    //cout<<"setWidth w = "<<w<<endl;
     if(locked)
     {
+        cout<<"LOCKED"<<endl;
         double scale = w/width;
         height = height*scale;
     }
     width = w;
-    
-    // update the corners
-    setCorners();
 }
 
 void BaseElement::setHeight(int h, bool locked)
@@ -64,13 +67,10 @@ void BaseElement::setHeight(int h, bool locked)
         double scale = h/height;
         width = width * scale;
     }
-    height = height;
-    
-    // update the corners
-    setCorners();
+    height = h;
 }
 
-void BaseElement::setRotation(double r)
+void BaseElement::setRotation(float r)
 {
     rotation = r;
 }
@@ -82,10 +82,29 @@ void BaseElement::setColor(float r, float g, float b)
 
 bool BaseElement::pointInBounds(int xCord, int yCord)
 {
-    if( x <= xCord && xCord <= x + width && 
-       y <= yCord && yCord <= y+height)
+    // If the Element is selected check bounding boxes too
+    if( selected )
+    {
+        selectedCorner = (CornerType)bounds->checkCorners(xCord, yCord);
+        /*selectedCorner = CNONE;
+        for(int i = 0; i < numCorners; i++)
+        {
+            if( corners[i]->pointInBounds(xCord, yCord) )
+                selectedCorner = (CornerType)i;
+        }*/
+    }
+    else
+    {
+        selectedCorner = CNONE;
+    }
+    
+    // If no corner is selected, check in the main object bounds
+    if(selectedCorner == CNONE)
+    {
+        return bounds->pointInBounds(xCord, yCord);
+    }
+    else
         return true;
-    return false;
 }
 
 // Returns true if the button was successfully clicked
@@ -94,58 +113,52 @@ bool BaseElement::mouse(int button, int state, int xpos, int ypos)
     
     //cout<<"BaseElement mouse button "<<button<<" state "<<state<<" ("<<xpos<<", "<<ypos<<")"<<endl;
     //cout<<"bounds ("<<x<<", "<<y<<", "<<x+width<<", "<<y+height<<")"<<endl;
-    bool cornerSelect = false;
-    
-    if(selected && button == GLUT_LEFT_BUTTON)
-    {
-        cout<<"BaseElement checking corners"<<endl;
-        // Check the corners
-        for(int i = 0; i < numCorners; i++)
-        {
-            if(corners[i]->pointInBounds(xpos, ypos))
-            {
-                cout<<"CORNERFOUND"<<endl;
-                corners[i]->select(true);
-                cornerSelect = true;
-                glutPostRedisplay();
-            }
-            else 
-                corners[i]->select(false);
-        }
-    }
-    
-    if(!cornerSelect  && button == GLUT_LEFT_BUTTON && pointInBounds(xpos,ypos))
-    {
 
+    if(button == GLUT_LEFT_BUTTON && pointInBounds(xpos,ypos))
+    {        
+        // Resize is available if element is already selected
+        if( selected )
+        {
+           
+        }
+        
+        
         if (state == GLUT_DOWN)
         {
+            // moveable is set when the mouse is pressed down in the element
             moveable = true;
             startX = xpos;
             startY = ypos;
         }
         else if( state == GLUT_UP && moveable)
         {
+            // selected is true if the mouse went down and up in the element
             selected = true;
             moveable = false;
+            selectedCorner = CNONE;
         }
         else
         {
+            // Not selected if the mouse did not originate in the element
             selected = false;
+            selectedCorner = CNONE;
         }
         
-        // re-draw the button
-        glutPostRedisplay();
     }
     else
     {
-        // Make sure the button does not get "stuck" selected
+        // De-select the element if left button is pressed somewhere else
         selected = false;
         moveable = false;
-        cout<<"BaseElement mouse button UNPRESS"<<endl;
-        // re-draw the button
-        glutPostRedisplay();
+        selectedCorner = CNONE;
     }
     
+    // TODO: better checks if bounds needs to be updated this is too frequent
+    if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+        updateBounds();
+    
+    // re-draw the button
+    glutPostRedisplay();
     return selected;
 }
 
@@ -153,68 +166,83 @@ bool BaseElement::mouseMotion(int xpos, int ypos)
 {
     //cout<<"BaseElement mouseMotion ("<<xpos<<", "<<ypos<<")"<<endl;
     
-    // Check if a corner is selected
-    // Movement of a corner changes size.
-    for(int i = 0; i < numCorners; i++)
-    {
-        if(corners[i]->isSelected())
-        {
-            int w = width;
-            int h = height;
-            
-            // Size change is handled differently at each corner
-            switch(i)
-            {
-                case CBL:
-                    // Origin x, y change
-                    
-                    break;
-                case CBR:
-                    // x stays the same y changes
-                    
-                    break;
-                case CTR:
-                    // Origin x, y stays the same
-                    w = w + (xpos - startX);
-                    h = h + (ypos - startY);
-                    setWidth(w, false);
-                    setHeight(h, false);
-                    break;
-                case CTL:
-                    // y stays the same
-                    
-                    break;
-                default:
-                    break;
-            }
-            
-            // If a corner is moved no other action should be done to the object
-            // save new mouse point
-            startX = xpos;
-            startY = ypos;
-            // redraw page
-            glutPostRedisplay();
-            return true;
-        }
-    }
-    
-    if(moveable)
+    // Move the selected object if no corner is set
+    if(moveable && selectedCorner == CNONE)
     {
         // Move the element the difference of the previous mouse location and current
         setPosition(x + (xpos - startX), y + (ypos - startY));
-        // update the corner locations
-        setCorners();
         
         // save the new mouse position
         startX = xpos;
         startY = ypos;
     }
+    else if(selectedCorner != CNONE)
+    {
+        // Check if a corner is selected
+        // Movement of a corner changes size.
+        int w = width;
+        int h = height;
+        
+        // Size change is handled differently at each corner
+        switch(selectedCorner)
+        {
+            case CBL:
+                // Origin x, y change
+                x = x - (startX - xpos);
+                y = y - (startY - ypos);
+                h = h + (startY - ypos);
+                w = w + (startX - xpos);
+                setWidth(w, false);
+                setHeight(h, false);
+                break;
+            case CBR:
+                // x stays the same, y changes
+                y = y - (startY - ypos);
+                w = w + (xpos - startX);
+                h = h + (startY - ypos);
+                setWidth(w, false);
+                setHeight(h, false);
+                break;
+            case CTR:
+                // Origin x, y stays the same
+                w = w + (xpos - startX);
+                h = h + (ypos - startY);
+                setWidth(w, false);
+                setHeight(h, false);
+                break;
+            case CTL:
+                // y stays the same, x changes
+                x = x - (startX - xpos);
+                w = w + (startX - xpos);
+                h = h + (ypos - startY);
+                setWidth(w, false);
+                setHeight(h, false);
+                break;
+            default:
+                break;
+        }
+        
+        // If a corner is moved no other action should be done to the object
+        // save new mouse point
+        startX = xpos;
+        startY = ypos;
+    }
+    
+    // redraw the page
     glutPostRedisplay();
 }
 
 void BaseElement::draw()
 {
     glPushMatrix();
+    // Translate to the correct location
+    glTranslatef(x, y, z);
+    
+    glPushMatrix();
+    // Set the rotation of the element
+    glRotatef(rotation, 0, 0, 1);
+    
+    // Set the color of the element
     if(moveable)
         glColor3f(0,0,1);
     else if(selected)
@@ -223,51 +251,239 @@ void BaseElement::draw()
         glColor3f(color->color.red,color->color.green,color->color.blue);
     glPointSize(1);
     
-    glRectf(x,y,x+width, y+width);
+    // Draw the Correct size
+    glRectf(0,0,width,height);
     
     // Draw the bounding box corners if selected
     if(selected)
     {
-        for(int i = 0; i < numCorners; i++)
-            corners[i]->draw();
+        drawCorners();
     }
+    glPopMatrix();
+    glPopMatrix();
+    
+    /*
+    //DEBUG
+    glPushMatrix();
+    bounds->draw();
+    glPopMatrix();
+    //DEBUG*/
+    
     
     glFlush();
-    glPopMatrix(); 
+    glPopMatrix();
+    
 }
 
-// Corner Functions
-CornerBox::CornerBox(int xpos, int ypos)
+void BaseElement::drawCorners()
 {
-    x = xpos;
-    y = ypos;
-    selected = false;
+    bool pushed;
+    for(int i = 0; i < bounds->numCorners; i++)
+    {
+        pushed = false;
+        
+        // Set the color
+        if(i == selectedCorner)
+            glColor3f(1,0,0);
+        else
+            glColor3f(1,0,1);
+        
+        // Translate to the corner
+        if(i == 0)
+        { 
+            glPushMatrix();
+            glTranslatef(-CORNER_SIZE/2, -CORNER_SIZE/2, 0);
+            pushed = true;
+        }
+        else if( i == 1)
+        {
+            glPushMatrix();
+            glTranslatef(width - CORNER_SIZE/2, -CORNER_SIZE/2, 0);
+            pushed = true;
+        }
+        else if(i == 2)
+        {
+            glPushMatrix();
+            glTranslatef(width - CORNER_SIZE/2, height - CORNER_SIZE/2, 0);
+            pushed = true;
+        }
+        else
+        {
+            glPushMatrix();
+            glTranslatef(-CORNER_SIZE/2, height - CORNER_SIZE/2, 0);
+            pushed = true;
+        } 
+        
+        // Draw the rect
+        if(pushed)
+        {
+            glRectf(0,0,CORNER_SIZE, CORNER_SIZE);
+            
+            glFlush();
+            glPopMatrix();
+        }
+        
+    }
+
 }
 
-void CornerBox::draw()
+// Bounding Box - public
+BoundingBox::BoundingBox(int x, int y, int w, int h, int a)
 {
-    if(selected)
-        glColor3f(1,0,0);
-    else
-        glColor3f(1,0,1);
-    glRectf(x - (CORNER_SIZE/2), y - (CORNER_SIZE/2), x + CORNER_SIZE/2, y + CORNER_SIZE/2);
+    xO = x;
+    yO = y;
+    width = w;
+    height = h;
+    angle =  a * PI/180; // convert to radians
+    calculateBounds();
 }
 
-bool CornerBox::pointInBounds(int xpos, int ypos)
+bool BoundingBox::pointInBounds(int xp, int yp)
 {
-    if(xpos > x - (CORNER_SIZE/2) && xpos < x + (CORNER_SIZE/2) &&
-       ypos > y - (CORNER_SIZE/2) && ypos < y + (CORNER_SIZE/2))
+    /*cout << " check point (" << xp << ", " << yp << ")" << endl;
+    print();
+    cout << "left : " << checkLeft(xp, yp) << endl;
+    cout << "right : " << checkRight(xp, yp) << endl;
+    cout << "top : " << checkTop(xp, yp) << endl;
+    cout << "bottom : " << checkBottom(xp, yp) << endl;
+    cout << "sides : " << checkLeft(xp, yp) * checkRight(xp, yp) << endl;
+    cout << "tops : " << checkTop(xp, yp) * checkBottom(xp, yp) << endl;
+    */
+    
+    // Special case angle is 0, 90, 180, 270, 360..
+    if(angle == 0)
+    {
+        if( xO <= xp && xp <= xO + width && 
+           yO <= yp && yp <= yO+height)
+            return true;
+        else
+            return false;
+    }
+    
+    // Check if the point is in between the top bottom and side lines
+    if(checkTop(xp,yp)*checkBottom(xp,yp) < 0 && checkLeft(xp,yp)*checkRight(xp,yp) < 0)
         return true;
+    
     return false;
 }
 
-void CornerBox::select(bool s)
+int BoundingBox::checkCorners(int xp, int yp)
 {
-    selected = s;
+    // Check if the point is CORNER_SIZE away from a corner point
+    
+    // Bottom Left
+    if( sqrt( (xp - xO)*(xp-xO) + (yp - xO)*(yp - yO) ) < CORNER_SIZE )
+        return CBL;
+    
+    // Bottom Right
+    if( sqrt( (xp - xBR)*(xp-xBR) + (yp - xBR)*(yp - yBR) ) < CORNER_SIZE )
+        return CBR;
+    
+    // Top Left
+    if( sqrt( (xp - xTL)*(xp-xTL) + (yp - xTL)*(yp - yTL) ) < CORNER_SIZE )
+        return CTL;
+    
+    // Top Right
+    if( sqrt( (xp - xTR)*(xp-xTR) + (yp - xTR)*(yp - yTR) ) < CORNER_SIZE )
+        return CTR;
+    
+    return CNONE;
 }
 
-bool CornerBox::isSelected()
+void BoundingBox::draw()
 {
-    return selected;
+    glColor3f(1,1,0);
+    glRectf(xO- CORNER_SIZE/2,yO- CORNER_SIZE/2,xO+ CORNER_SIZE/2, yO + CORNER_SIZE/2);
+    
+    glRectf(xBR- CORNER_SIZE/2,yBR- CORNER_SIZE/2,xBR+ CORNER_SIZE/2, yBR + CORNER_SIZE/2);
+    
+    glRectf(xTL- CORNER_SIZE/2,yTL- CORNER_SIZE/2,xTL+ CORNER_SIZE/2, yTL + CORNER_SIZE/2);
+    
+    glRectf(xTR- CORNER_SIZE/2,yTR- CORNER_SIZE/2,xTR+ CORNER_SIZE/2, yTR + CORNER_SIZE/2);
 }
+
+void BoundingBox::setAngle(int a)
+{
+    angle = a * PI/180; // convert to radians
+    calculateBounds();
+}
+
+void BoundingBox::setOrigin(int xp, int yp)
+{
+    xO = xp;
+    yO = yp;
+    calculateBounds();
+}
+
+void BoundingBox::setDimensions(int w, int h)
+{
+    width = w;
+    height = h;
+    calculateBounds();
+}
+
+// Bounding Box - private
+
+void BoundingBox::calculateBounds()
+{
+    mainSlope = tan(angle);
+    sideSlope =  tan(angle + (PI/2)); // add 90 degrees
+    
+    // Endpoints ( xO + length*cos(angle), yO + length*sin(angle) )
+    xBR = xO + width * cos(angle);
+    yBR = yO + width * sin(angle);
+    xTR = xBR + height * cos(angle + (PI/2));
+    yTR = yBR + height * sin(angle + (PI/2));
+    xTL = xO + height * cos(angle + (PI/2));
+    yTL = yO + height * sin(angle + (PI/2));
+    
+    // Offset = y - slope * x
+    offsetB = yO - mainSlope * xO;
+    offsetT = yTL - mainSlope * xTL;
+    offsetL = yO - sideSlope * xO;
+    offsetR = yBR - sideSlope * xBR;
+}
+
+/* Based on equation of a line y = mx + b
+ * Returns:
+ *  0 - point is on line
+ *  positive - point is above line
+ *  negative - point is below line
+ */
+int BoundingBox::checkBottom(int xp, int yp)
+{
+    return yp - mainSlope * xp - offsetB;
+}
+
+int BoundingBox::checkTop(int xp, int yp)
+{
+    return yp - mainSlope * xp - offsetT;
+}
+
+int BoundingBox::checkLeft(int xp, int yp)
+{
+    return yp - sideSlope * xp - offsetL;
+}
+
+int BoundingBox::checkRight(int xp, int yp)
+{
+    return yp - sideSlope * xp - offsetR;
+}
+
+void BoundingBox::print()
+{
+    cout<<"Origin : (" << xO << ", " << yO <<")"<<endl;
+    cout<<"Btm Rt : (" << xBR << ", " << yBR <<")"<<endl;
+    cout<<"Top Rt : (" << xTR << ", " << yTR <<")"<<endl;
+    cout<<"Top Lt : (" << xTL << ", " << yTL <<")"<<endl;
+    cout<<"mainSlope = " << mainSlope << endl;
+    cout<<"sideSlope = " << sideSlope << endl;
+    cout<<"Lines: y = mx + b"<<endl;
+    cout<<"       y = " << mainSlope << "x + " << offsetB << endl;
+    cout<<"       y = " << mainSlope << "x + " << offsetT << endl;
+    cout<<"       y = " << sideSlope << "x + " << offsetL << endl;
+    cout<<"       y = " << sideSlope << "x + " << offsetR << endl;
+}
+
+
 

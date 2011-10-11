@@ -12,23 +12,59 @@
 #include "Utility.h"
 
 #define CORNER_SIZE 5
+#define PI 3.14159265
 
-class CornerBox
+class BoundingBox
 {
-private:
-    int x;
-    int y;
-    bool selected;
-    
 public:
-    CornerBox(int xpos, int ypos);
+    BoundingBox(int x, int y, int w, int h, int a); // takes angle in degrees
+    bool pointInBounds(int xp, int yp);
+    int checkCorners(int xp, int yp);
+    void setAngle(int a); // takes angle in degrees
+    void setOrigin(int xp, int yp);
+    void setDimensions(int w, int h);
     void draw();
-    bool pointInBounds(int xpos, int ypos);
-    void setPosition(int xpos, int ypos);
-    void select(bool s);
-    bool isSelected();
+    
+    static const int numCorners = 4;
+    
+private:
+    // Given values
+    int xO;
+    int yO;
+    int width;
+    int height;
+    double angle; // Radians
+    
+    // Calculated values
+    int xBR,yBR,xTR,yTR,xTL,yTL;
+    double mainSlope;
+    double sideSlope;
+    double offsetB, offsetT, offsetL, offsetR;
+    
+    // Calculations
+    void calculateBounds();
+    int checkBottom(int xp, int yp);
+    int checkTop(int xp, int yp);
+    int checkLeft(int xp, int yp);
+    int checkRight(int xp, int yp);
+    
+    // Bounding box corners
+    enum CornerType{
+        CBL = 0,
+        CBR,
+        CTR,
+        CTL,
+        CNONE
+    };
+    //CornerBox *corners[numCorners];
+    //void setCorners();
+    //enum CornerType selectedCorner;
+    
+    // Debug
+    void print();
     
 };
+
 
 class BaseElement
 {
@@ -46,22 +82,25 @@ protected:
     // Bounding box dimensions
     int width;
     int height;
+    BoundingBox *bounds;
+    void updateBounds();
+    
+    // Properties
+    BaseColor *color;
+    float rotation;
+    enum Type elementType;
+    
     
     // Bounding box corners
     static const int numCorners = 4;
     enum CornerType{
-        CBL,
+        CBL = 0,
         CBR,
         CTR,
-        CTL
+        CTL,
+        CNONE
     };
-    CornerBox *corners[numCorners];
-    void setCorners();
-    
-    // Properties
-    BaseColor *color;
-    double rotation;
-    enum Type elementType;
+    enum CornerType selectedCorner;
     
     // States
     bool selected;
@@ -71,6 +110,9 @@ protected:
     int startX;
     int startY;
     
+    // Drawing helpers
+    void drawCorners();
+    
     bool pointInBounds(int xCord, int yCord);
     
 public:
@@ -78,7 +120,7 @@ public:
     void setPosition(int xpos, int ypos);
     void setWidth(int w, bool locked);
     void setHeight(int h, bool locked);
-    void setRotation(double r);
+    void setRotation(float r);
     void setColor(float r, float g, float b);
     bool mouse(int button, int state, int xpops, int ypos);
     bool mouseMotion(int xpos, int ypos);
