@@ -26,6 +26,7 @@ BaseElement::BaseElement()
     // Movement properties
     selected = false;
     moveable = false;
+    rotateable = false;
     startX = 0;
     startY = 0;
     
@@ -145,11 +146,19 @@ bool BaseElement::mouse(int button, int state, int xpos, int ypos)
         }
         
     }
-    else
+    // Rotate Case
+    else if(selected && button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
+        selected = true;
+        rotateable = true;
+        moveable = false;
+        selectedCorner = CNONE;
+    }else
     {
         // De-select the element if left button is pressed somewhere else
         selected = false;
         moveable = false;
+        rotateable = false;
         selectedCorner = CNONE;
     }
     
@@ -183,7 +192,15 @@ bool BaseElement::mouseMotion(int xpos, int ypos)
         int w = width;
         int h = height;
         
-        // Size change is handled differently at each corner
+        // resize is handled differently at each corner
+        double resized[4];
+        bounds->calculateResize(xpos, ypos, selectedCorner, resized);
+        x = resized[0];
+        y = resized[1];
+        setWidth(resized[2], false);
+        setHeight(resized[3], false);
+       // cout<<"Width and height " << w << " " << h<<endl<<endl;
+        /*
         switch(selectedCorner)
         {
             case CBL:
@@ -197,11 +214,19 @@ bool BaseElement::mouseMotion(int xpos, int ypos)
                 break;
             case CBR:
                 // x stays the same, y changes
+                
                 y = y - (startY - ypos);
                 w = w + (xpos - startX);
                 h = h + (startY - ypos);
                 setWidth(w, false);
                 setHeight(h, false);
+                // Calculate the new origin, w and h
+                bounds->calculateResize(xpos, ypos, CBR, resized);
+                x = resized[0];
+                y = resized[1];
+                setWidth(resized[2], false);
+                setHeight(resized[3], false);
+                
                 break;
             case CTR:
                 // Origin x, y stays the same
@@ -220,10 +245,21 @@ bool BaseElement::mouseMotion(int xpos, int ypos)
                 break;
             default:
                 break;
-        }
+        }*/
         
         // If a corner is moved no other action should be done to the object
         // save new mouse point
+        startX = xpos;
+        startY = ypos;
+    }
+    else if(rotateable)
+    {
+        // Rotate if the item is selected and the mouse is moved outside the element
+        //cout<<"ROTATE"<<endl;
+        double deltaAngle = bounds->calculateRotate(startX, startY, xpos, ypos);
+        
+        setRotation(rotation + deltaAngle);
+        
         startX = xpos;
         startY = ypos;
     }
@@ -252,7 +288,7 @@ void BaseElement::draw()
     glPointSize(1);
     
     // Draw the Correct size
-    glRectf(0,0,width,height);
+    drawElement();
     
     // Draw the bounding box corners if selected
     if(selected)
@@ -262,17 +298,22 @@ void BaseElement::draw()
     glPopMatrix();
     glPopMatrix();
     
-    /*
+    
     //DEBUG
     glPushMatrix();
     bounds->draw();
     glPopMatrix();
-    //DEBUG*/
+    //DEBUG
     
     
     glFlush();
     glPopMatrix();
     
+}
+
+void BaseElement::drawElement()
+{
+    glRectf(0,0,width,height);
 }
 
 void BaseElement::drawCorners()
@@ -390,6 +431,133 @@ int BoundingBox::checkCorners(int xp, int yp)
     return CNONE;
 }
 
+void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
+{
+    double  xn = 0, 
+            yn = 0, 
+            dh = 0, 
+            dw = 0,
+            xO1 = 0,
+            yO1 = 0;
+    
+    // TODO: handle 0 case..
+    
+    if(corner == CBL)
+    {
+        // Find intersection (xn, yn) of two lines
+        // bottom of element and perpendicular line going through (xp, yp)
+        xn = (mainSlope * xp - sideSlope * xO - yp + yO) / (mainSlope - sideSlope);
+        yn = mainSlope * (xn - xp) + yp;
+        
+        // Calculate the change in width and height (dw, dh)
+        dh = sqrt( (xO - xn)*(xO - xn) + (yO - yn)*(yO - yn) );
+        dw = sqrt( (xp - xn)*(xp - xn) + (yp - yn)*(yp - yn) );
+        
+        // Retain the direction of the change
+        if(checkLeft(xp, yp) > 0)
+            dw = dw * -1;
+        if(checkBottom(xp, yp) > 0)
+            dh = dh * -1;
+
+        // New origin is (xp,yp)
+        xO1 = xp;
+        yO1 = yp;
+    }
+    
+    if(corner == CBR)
+    {
+        // Find intersection (xn, yn) of two lines
+        // bottom of element and perpendicular line going through (xp, yp)
+        xn = (mainSlope * xp - sideSlope * xBR - yp + yBR) / (mainSlope - sideSlope);
+        yn = mainSlope * (xn - xp) + yp;
+        
+        // Calculate the change in width and height (dw, dh)
+        dh = sqrt( (xBR - xn)*(xBR - xn) + (yBR - yn)*(yBR - yn) );
+        dw = sqrt( (xp - xn)*(xp - xn) + (yp - yn)*(yp - yn) );
+        
+        // Retain the direction of the change
+        if(checkRight(xp, yp) < 0)
+            dw = dw * -1;
+        if(checkBottom(xp, yp) > 0)
+            dh = dh * -1;
+        
+        // Calculate the new origin (xO1, yO1)
+        xO1 = xO + dh * cos(angle - PI/2); // angle minus 90 degrees
+        yO1 = yO + dh * sin(angle - PI/2); // angle minus 90 degrees
+    }
+    
+    if(corner == CTR)
+    {
+        // Find intersection (xn, yn) of two lines
+        // bottom of element and perpendicular line going through (xp, yp)
+        xn = (mainSlope * xp - sideSlope * xTR - yp + yTR) / (mainSlope - sideSlope);
+        yn = mainSlope * (xn - xp) + yp;
+        
+        // Calculate the change in width and height (dw, dh)
+        dh = sqrt( (xTR - xn)*(xTR - xn) + (yTR - yn)*(yTR - yn) );
+        dw = sqrt( (xp - xn)*(xp - xn) + (yp - yn)*(yp - yn) );
+        
+        // Retain the direction of the change
+        if(checkRight(xp, yp) < 0)
+            dw = dw * -1;
+        if(checkTop(xp, yp) < 0)
+            dh = dh * -1;
+        
+        // Origin remains the same
+        xO1 = xO;
+        yO1 = yO;
+    }
+    
+    if(corner == CTL)
+    {
+        // Find intersection (xn, yn) of two lines
+        // bottom of element and perpendicular line going through (xp, yp)
+        xn = (sideSlope * xTL - mainSlope * xp + yp - yTL) / (sideSlope - mainSlope);
+        yn = yp - mainSlope * (xp - xn);
+        
+        // Calculate the change in width and height (dw, dh)
+        dh = sqrt( (xn - xTL)*(xn - xTL) + (yn - yTL)*(yn - yTL) );
+        dw = sqrt( (xp - xn)*(xp - xn) + (yp - yn)*(yp - yn) );
+        
+        // Retain the direction of the change
+        if(checkLeft(xp, yp) > 0)
+            dw = dw * -1;
+        if(checkTop(xp, yp) < 0)
+            dh = dh * -1;
+        
+        // Calculate the new origin (xO1, yO1)
+        xO1 = xO + dw * cos(angle + PI); // 180 minus angle
+        yO1 = yO + dw * sin(angle + PI); // 180 minus angle
+    }
+    
+    
+    //print();
+   /* cout << "calculateResize : " << endl;
+    cout << "mouse : (" << xp << ", " << yp <<")"<<endl;
+    cout << "origin : (" << xO << ", " << yO <<")"<<endl;
+    cout << "new origin : (" << xO1 << ", " << yO1 <<")"<<endl;
+    cout << "dw, dh : (" << dw << ", " << dh <<")"<<endl;
+    cout << "xn, yn : (" << xn << ", " << yn <<")"<<endl<<endl;*/
+    
+    
+    ans[0] = xO1;
+    ans[1] = yO1;
+    ans[2] = width + dw;
+    ans[3] = height + dh;
+}
+
+double BoundingBox::calculateRotate(int xp1, int yp1, int xp2, int yp2)
+{
+    // TODO: convert to rotate around center...
+    // Treat xO, yO as the origin
+    double angle1 = atan2(xp1-xO, yp1-yO);
+    double angle2 = atan2(xp2-xO, yp2-yO);
+   
+    // Return the difference in degrees
+    return (angle2-angle1) * -180/PI;
+}
+
+
 void BoundingBox::draw()
 {
     glColor3f(1,1,0);
@@ -400,6 +568,8 @@ void BoundingBox::draw()
     glRectf(xTL- CORNER_SIZE/2,yTL- CORNER_SIZE/2,xTL+ CORNER_SIZE/2, yTL + CORNER_SIZE/2);
     
     glRectf(xTR- CORNER_SIZE/2,yTR- CORNER_SIZE/2,xTR+ CORNER_SIZE/2, yTR + CORNER_SIZE/2);
+    
+    glRectf(xC - 1, yC - 1, xC + 1, yC + 1);
 }
 
 void BoundingBox::setAngle(int a)
@@ -436,6 +606,8 @@ void BoundingBox::calculateBounds()
     yTR = yBR + height * sin(angle + (PI/2));
     xTL = xO + height * cos(angle + (PI/2));
     yTL = yO + height * sin(angle + (PI/2));
+    xC  = xO + sqrt( pow(width/2, 2) + pow(height/2, 2)) * cos(angle + atan(height/width));
+    yC  = yO + sqrt( pow(width/2, 2) + pow(height/2, 2)) * sin(angle + atan(height/width));
     
     // Offset = y - slope * x
     offsetB = yO - mainSlope * xO;

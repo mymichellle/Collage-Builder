@@ -18,11 +18,21 @@ class BoundingBox
 {
 public:
     BoundingBox(int x, int y, int w, int h, int a); // takes angle in degrees
+    
+    // Bounds Checking
     bool pointInBounds(int xp, int yp);
     int checkCorners(int xp, int yp);
+    
+    // Setters
     void setAngle(int a); // takes angle in degrees
     void setOrigin(int xp, int yp);
     void setDimensions(int w, int h);
+    
+    // Calculations
+    void calculateResize(int xp, int yp, int corner, double *ans);
+    double calculateRotate(int xp1, int yp1, int xp2, int yp2);
+    
+    // Debug
     void draw();
     
     static const int numCorners = 4;
@@ -36,7 +46,7 @@ private:
     double angle; // Radians
     
     // Calculated values
-    int xBR,yBR,xTR,yTR,xTL,yTL;
+    int xBR,yBR,xTR,yTR,xTL,yTL,xC,yC;
     double mainSlope;
     double sideSlope;
     double offsetB, offsetT, offsetL, offsetR;
@@ -105,6 +115,7 @@ protected:
     // States
     bool selected;
     bool moveable;
+    bool rotateable;
     
     // Manipulation Variables
     int startX;
@@ -112,6 +123,7 @@ protected:
     
     // Drawing helpers
     void drawCorners();
+    virtual void drawElement();
     
     bool pointInBounds(int xCord, int yCord);
     
@@ -124,7 +136,7 @@ public:
     void setColor(float r, float g, float b);
     bool mouse(int button, int state, int xpops, int ypos);
     bool mouseMotion(int xpos, int ypos);
-    virtual void draw();
+    void draw();
 };
 
 

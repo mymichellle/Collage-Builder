@@ -14,6 +14,7 @@
 #include "Utility.h"
 #include "Collage.h"
 #include "CreatePage.h"
+#include "ImageElement.h"
 
 using namespace std;
 
@@ -35,7 +36,7 @@ void ImagePage::mouse(int button, int state, int x, int y)
 
 void ImagePage::onSavePress()
 {
-    Collage::sharedCollage().addElement(new BaseElement());
+    Collage::sharedCollage().addElement(new ImageElement());
     Collage::sharedCollage().setDisplayPage(new CreatePage());
 }
 
