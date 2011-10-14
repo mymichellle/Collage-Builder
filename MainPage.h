@@ -20,6 +20,7 @@ private:
     void onNewPress();
     void onLoadPress();
     
+    
 public:
     MainPage();
     void mouse(int button, int state, int x, int y);

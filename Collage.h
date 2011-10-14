@@ -37,6 +37,7 @@ public:
     
     void mouse(int button, int state, int x, int y);
     void mouseMotion(int x, int y);
+    void keyboard(unsigned char key, int x, int y);
     void display();
     void reshape(int w, int h);
     

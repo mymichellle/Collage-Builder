@@ -15,6 +15,7 @@
 #include <GL/glut.h>
 #include <GLUT/glut.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <iostream>
 
 using namespace std;

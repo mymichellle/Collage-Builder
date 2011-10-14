@@ -22,6 +22,7 @@ public:
     BasePage();
     virtual void mouse(int button, int state, int x, int y);
     virtual void mouseMotion(int x, int y);
+    virtual void keyboard(unsigned char key, int x, int y);
     virtual void enterPage();
     virtual void display();
     virtual void cleanUp();

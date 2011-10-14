@@ -45,6 +45,11 @@ void BasePage::mouseMotion(int x, int y)
     
 }
 
+void BasePage::keyboard(unsigned char key, int x, int y)
+{
+    
+}
+
 void BasePage::display(void)
 {
     glPushMatrix();

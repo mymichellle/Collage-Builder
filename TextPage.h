@@ -11,11 +11,14 @@
 
 #include "BasePage.h"
 #include "BaseButton.h"
+#include "BaseDialog.h"
 
 class TextPage: public BasePage
 {
     BaseButton *btn_save;
     BaseButton *btn_back;
+    
+    BaseDialog *dialog_text;
     
     void onSavePress();
     void onBackPress();
@@ -23,6 +26,8 @@ class TextPage: public BasePage
 public:
     TextPage();
     void mouse(int button, int state, int x, int y);
+    void mouseMotion(int x, int y);
+    void keyboard(unsigned char key, int x, int y);
     void display();
     
 };

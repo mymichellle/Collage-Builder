@@ -45,6 +45,12 @@ void mouseMotion(int x, int y)
     Collage::sharedCollage().mouseMotion(x, y);
 }
 
+void keyboard(unsigned char key, int x, int y)
+{
+    correctCoords(x,y);
+    Collage::sharedCollage().keyboard(key, x, y);
+}
+
 /*
  * Create Display Window
  */
@@ -55,7 +61,7 @@ int main(int argc, char** argv)
     glutInitWindowSize (WINDOW_WIDTH, WINDOW_HEIGHT); 
     glutInitWindowPosition (400, 100);
     glutCreateWindow ("Collage Builder");
-    
+        
     // Set the GL origin to be at the lower left
     glMatrixMode(GL_PROJECTION);
     glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
@@ -69,9 +75,7 @@ int main(int argc, char** argv)
     glutReshapeFunc(reshape); 
     glutMouseFunc(mouse);
     glutMotionFunc(mouseMotion);
-    
-    //BuildPopupMenu();
-    //glutAttachMenu (GLUT_RIGHT_BUTTON);
+    glutKeyboardFunc(keyboard);
     
     glutMainLoop();
     return 0;

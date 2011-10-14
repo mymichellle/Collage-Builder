@@ -46,6 +46,11 @@ void Collage::mouseMotion(int x, int y)
     displayPage->mouseMotion(x,y);
 }
 
+void Collage::keyboard(unsigned char key, int x, int y)
+{
+    displayPage->keyboard(key,x,y);
+}
+
 void Collage::setDisplayPage(BasePage *newPage)
 {
     displayPage->cleanUp();
