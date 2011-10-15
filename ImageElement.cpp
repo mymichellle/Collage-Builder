@@ -14,6 +14,7 @@ using namespace std;
 
 ImageElement::ImageElement(string s, int xpos, int ypos)
 {
+    elementType = IMAGE_ELEMENT;
     x = xpos;
     y = ypos;
     z = 0;

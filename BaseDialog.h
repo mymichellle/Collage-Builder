@@ -39,6 +39,8 @@ public:
     void draw();
     std::string getValue();
     
+    void setValue(std::string s);
+    void setValue(float f);
 };
 
 #endif

@@ -15,6 +15,11 @@
 #include "Utility.h"
 #include <iostream>
 
+#define MAX_ELEMENTS    20
+#define COLLAGE_MENU_HEIGHT     200
+#define COLLAGE_DISPLAY_WIDTH   WINDOW_WIDTH
+#define COLLAGE_DISPLAY_HEIGHT  WINDOW_HEIGHT - COLLAGE_MENU_HEIGHT
+
 class Collage
 {
 private:    
@@ -24,11 +29,19 @@ private:
     Collage(Collage const&);
     void operator=(Collage const&);
     
+    // Current page
     BasePage *displayPage;
+    
+    // Elements of the collage
     BaseElement* elements[MAX_ELEMENTS];
     int numElements;
+    int getZValue(BaseElement *elem);
     
+    // Fonts
     BaseFont *mainFont;
+    
+    // Collage States
+    bool created;
     
 public:
     // Singleton Collage
@@ -46,7 +59,13 @@ public:
     
     void setDisplayPage(BasePage *newPage);
     bool addElement(BaseElement *elem);
+    bool removeElement(BaseElement *elem);
+    bool moveElementForward(BaseElement *elem);
+    bool moveElementBackward(BaseElement *elem);
+    void setupCollage();
+    
     void drawElements();
+    void drawElements(int offsetX, int offsetY);
     
     int getNumberOfElements();
     BaseElement *getElement(int index);

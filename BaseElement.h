@@ -135,9 +135,12 @@ public:
     void setHeight(int h, bool locked);
     void setRotation(float r);
     void setColor(float r, float g, float b);
+    void deselect();
     
     int getWidth();
     int getHeight();
+    float getRotation();
+    BaseColor* getColor();
     
     bool mouse(int button, int state, int xpops, int ypos);
     bool mouseMotion(int xpos, int ypos);

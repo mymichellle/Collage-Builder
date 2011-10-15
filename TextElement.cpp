@@ -16,6 +16,7 @@ using namespace std;
 
 TextElement::TextElement(string s, int centerX, int centerY)
 {
+    elementType = TEXT_ELEMENT;
     text = s;
     width = 1;
     height = 1;

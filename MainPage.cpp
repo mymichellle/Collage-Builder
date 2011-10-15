@@ -22,8 +22,8 @@ using namespace std;
 
 MainPage::MainPage()
 {
-    btn_new = new BaseButton("New", WINDOW_WIDTH/2, 200);
-    btn_load = new BaseButton("Load", WINDOW_WIDTH/2, 100);
+    btn_new = new BaseButton("New", WINDOW_WIDTH/2, WINDOW_HEIGHT - 150);
+    btn_load = new BaseButton("Load", WINDOW_WIDTH/2, WINDOW_HEIGHT - 250);
     
     title = "Collage Builder";
 }

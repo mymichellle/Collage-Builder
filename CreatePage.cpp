@@ -23,10 +23,10 @@ CreatePage::CreatePage()
 {    
     title = "Create A Collage";
     
-    btn_text = new BaseButton("TEXT", WINDOW_WIDTH/2, 300);
-    btn_image = new BaseButton("IMAGE", WINDOW_WIDTH/2, 230);
-    btn_settings = new BaseButton("SETTINGS", WINDOW_WIDTH/2, 160);
-    btn_collage = new BaseButton("COLLAGE", WINDOW_WIDTH/2, 90);
+    btn_text = new BaseButton("TEXT", WINDOW_WIDTH/2, WINDOW_HEIGHT - 150);
+    btn_image = new BaseButton("IMAGE", WINDOW_WIDTH/2, WINDOW_HEIGHT - 250);
+    btn_settings = new BaseButton("SETTINGS", WINDOW_WIDTH/2, WINDOW_HEIGHT - 350);
+    btn_collage = new BaseButton("COLLAGE", WINDOW_WIDTH/2, WINDOW_HEIGHT - 450);
     btn_back = new BaseButton("BACK", 100, 70);
 }
 

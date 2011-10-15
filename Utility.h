@@ -14,9 +14,8 @@
 
 using namespace std;
 
-#define WINDOW_WIDTH    600
-#define WINDOW_HEIGHT   400
-#define MAX_ELEMENTS    20
+#define WINDOW_WIDTH    800
+#define WINDOW_HEIGHT   600
 
 #define DISPLAY_FONT    GLUT_BITMAP_HELVETICA_18 //GLUT_BITMAP_9_BY_15;
 

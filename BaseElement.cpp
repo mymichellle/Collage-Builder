@@ -8,6 +8,7 @@
 
 #include <GL/gl.h>
 #include "BaseElement.h"
+#include "Collage.h"
 #include <stdlib.h>
 #include <iostream>
 #include <math.h>
@@ -81,6 +82,16 @@ int BaseElement::getHeight()
     return height;
 }
 
+float BaseElement::getRotation()
+{
+    return rotation;
+}
+
+BaseColor* BaseElement::getColor()
+{
+    return color;
+}
+
 void BaseElement::setRotation(float r)
 {
     rotation = r;
@@ -89,6 +100,14 @@ void BaseElement::setRotation(float r)
 void BaseElement::setColor(float r, float g, float b)
 {
     color->color.red = r, color->color.green = g, color->color.blue = b;
+}
+
+void BaseElement::deselect()
+{
+    cout<<"Deselect "<<endl;
+    selected = false;
+    rotateable = false;
+    moveable = false;
 }
 
 bool BaseElement::pointInBounds(int xCord, int yCord)
@@ -140,8 +159,7 @@ bool BaseElement::mouse(int button, int state, int xpos, int ypos)
             moveable = true;
             startX = xpos;
             startY = ypos;
-        }
-        else if( state == GLUT_UP && moveable)
+        }else if( state == GLUT_UP && moveable)
         {
             // selected is true if the mouse went down and up in the element
             selected = true;
@@ -163,6 +181,9 @@ bool BaseElement::mouse(int button, int state, int xpos, int ypos)
         rotateable = true;
         moveable = false;
         selectedCorner = CNONE;
+    }else if (button == GLUT_RIGHT_BUTTON && pointInBounds(xpos,ypos))
+    {
+        Collage::sharedCollage().moveElementBackward(this);
     }else
     {
         // De-select the element if left button is pressed somewhere else
@@ -178,7 +199,7 @@ bool BaseElement::mouse(int button, int state, int xpos, int ypos)
     
     // re-draw the button
     glutPostRedisplay();
-    return selected;
+    return (selected || moveable);
 }
 
 bool BaseElement::mouseMotion(int xpos, int ypos)
@@ -281,44 +302,45 @@ bool BaseElement::mouseMotion(int xpos, int ypos)
 void BaseElement::draw()
 {
     glPushMatrix();
-    // Translate to the correct location
-    glTranslatef(x, y, z);
-    
-    glPushMatrix();
-    // Set the rotation of the element
-    glRotatef(rotation, 0, 0, 1);
-    
-    // Set the color of the element
-    if(moveable)
-        glColor3f(0,0,1);
-    else if(selected)
-        glColor3f(0,1,0);
-    else
-        glColor3f(color->color.red,color->color.green,color->color.blue);
-    glPointSize(1);
-    
-    // Draw the Correct size
-    drawElement();
-    
-    // Draw the bounding box corners if selected
-    if(selected)
-    {
-        drawCorners();
-    }
-    glPopMatrix();
-    glPopMatrix();
-    
-    
-    //DEBUG
-    glPushMatrix();
-    bounds->draw();
-    glPopMatrix();
-    //DEBUG
-    
+        // Translate to the correct location
+        glTranslatef(x, y, z);
+        
+        glPushMatrix();
+            // Set the rotation of the element
+            glRotatef(rotation, 0, 0, 1);
+            
+            // Set the color of the element
+            if(moveable)
+                glColor3f(0,0,1);
+            else if(selected)
+            {
+                cout<<"set selected colors"<<endl;
+                glColor3f(0,1,0);
+            }
+            else
+                glColor3f(color->color.red,color->color.green,color->color.blue);
+            glPointSize(1);
+            
+            // Draw the Correct size
+            drawElement();
+            
+            // Draw the bounding box corners if selected
+            if(selected)
+            {
+                cout<<"draw corners"<<endl;
+                drawCorners();
+            }
+        glPopMatrix();
     
     glFlush();
     glPopMatrix();
-    
+        
+        
+    //DEBUG - Show Bounding Box
+    glPushMatrix();
+        bounds->draw();
+    glPopMatrix();
+    //DEBUG
 }
 
 void BaseElement::drawElement()

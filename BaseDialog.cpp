@@ -8,6 +8,7 @@
 
 #include "BaseDialog.h"
 #include <string>
+#include <sstream>
 #include "Utility.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -154,6 +155,18 @@ void BaseDialog::draw()
 string BaseDialog::getValue()
 {
     return val;
+}
+
+void BaseDialog::setValue(string s)
+{
+    val = s;
+}
+
+void BaseDialog::setValue(float f)
+{
+    ostringstream buffer;
+    buffer<<f;
+    val = buffer.str();
 }
 
 bool BaseDialog::pointInBounds(int xCord, int yCord)

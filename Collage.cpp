@@ -13,7 +13,6 @@
 
 #include "Collage.h"
 
-
 Collage::Collage()
 {
     // Set color to white
@@ -27,6 +26,7 @@ Collage::Collage()
     mainFont = new BaseFont(0);
     
     numElements = 0;
+    created = false;
 }
 
 void Collage::display(void)
@@ -74,10 +74,97 @@ bool Collage::addElement(BaseElement *elem)
         return false;
 }
 
+bool Collage::removeElement(BaseElement *elem)
+{
+    bool found = false;
+    for(int i = 0; i < numElements; i++)
+    {
+        // If the element has been found move all other elements up
+        if(found)
+        {
+            elements[i-1] = elements[i];
+        }
+        else if(elem == elements[i])
+        {
+            found = true;
+            elements[i] = NULL;
+        }
+    }
+    
+    // decriment the numElements
+    if(found)
+        numElements--;
+    
+    return found;
+}
+
+bool Collage::moveElementForward(BaseElement *elem)
+{
+    int index = getZValue(elem);
+    if(index < 0)
+        return false; // No element found
+    else if(index == numElements-1)
+        return true; // element already at the front
+    else
+    {
+        BaseElement *temp = elements[index];
+        elements[index] = elements[index+1];
+        elements[index+1] = temp;
+        return true;
+    }
+        
+}
+bool Collage::moveElementBackward(BaseElement *elem)
+{
+    int index = getZValue(elem);
+    if(index < 0)
+        return false; // No element found
+    else if(index == 0)
+        return true; // element already at the back
+    else
+    {
+        BaseElement *temp = elements[index];
+        elements[index] = elements[index-1];
+        elements[index-1] = temp;
+        return true;
+    }
+    
+}
+
+int Collage::getZValue(BaseElement *elem)
+{
+    int z = -1;
+    for(int i = 0; i < numElements; i++)
+    {
+        if(elements[i] == elem)
+            z = i;
+    }
+    return z;
+}
+
+void Collage::setupCollage()
+{
+    // If this is the first time the collage is displayed
+    // Randomize the location of elements
+    if(!created)
+    {
+        
+    }
+}
+
 void Collage::drawElements()
 {
+    drawElements(0,0);
+}
+
+void Collage::drawElements(int offsetX, int offsetY)
+{
+    
+    glTranslatef(offsetX, offsetY, 0);
     for(int i = 0; i < numElements; i++)
+    {
         elements[i]->draw();
+    }
 }
 
 int Collage::getNumberOfElements()
