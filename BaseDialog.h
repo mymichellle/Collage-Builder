@@ -14,13 +14,14 @@
 class BaseDialog
 {
 protected:
+    void initialize(std::string t, std::string d, int centerX, int centerY, int w);
+    
     int width;
     int height;
     int x;
     int y;
     int textX;
     int textY;
-    //char val[80];
     std::string val;
     int valLength;
     std::string label;
@@ -31,6 +32,7 @@ protected:
     
 public:
     BaseDialog(std::string t, std::string d, int centerX, int centerY);
+    BaseDialog(std::string t, std::string d, int centerX, int centerY, int w);
     bool mouse(int button, int state, int x, int y);
     bool mouseMotion(int x, int y);
     void keyboard(unsigned char key, int x, int y);

@@ -12,16 +12,27 @@
 #include "BasePage.h"
 #include "BaseButton.h"
 #include "BaseDialog.h"
+#include "TextElement.h"
 
 class TextPage: public BasePage
 {
+private:
+    TextElement *element;
+    
     BaseButton *btn_save;
     BaseButton *btn_back;
     
     BaseDialog *dialog_text;
+    BaseDialog *dialog_red;
+    BaseDialog *dialog_green;
+    BaseDialog *dialog_blue;
+    BaseDialog *dialog_rotation;
+    BaseDialog *dialog_size;
     
     void onSavePress();
     void onBackPress();
+    
+    void defineTextElement();
 
 public:
     TextPage();

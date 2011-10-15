@@ -10,10 +10,12 @@
 
 #include "ImageElement.h"
 
-ImageElement::ImageElement()
+using namespace std;
+
+ImageElement::ImageElement(string s, int xpos, int ypos)
 {
-    x = 0;
-    y = 0;
+    x = xpos;
+    y = ypos;
     z = 0;
     width = 256;
     height = 256;
@@ -31,53 +33,51 @@ ImageElement::ImageElement()
     // Initialize the corners
     selectedCorner = CNONE;
 
-    
-    
+    setImage(s);
+        
+}
+
+void ImageElement::setImage(string s)
+{
     // Texture test
     int channels, force_channels = 0;
-   	unsigned char *result = stbi_load( /*"img_cheryl.jpg"*/ "img_test.png",
+   	unsigned char *result = stbi_load(s.c_str(),
                                       &width, &height, &channels, force_channels );
     if( result == NULL )
 	{
         cout<<"TEST FAIL "<<stbi_failure_reason()<<endl;
 	} else
-	{
-		cout<<"TEST Image loaded"<<endl;
-        cout<<"Width , height, channels "<< width << " " << height << " " << channels<<endl;
-	}
-    
-    // make it a texture
-    img = (unsigned char*)malloc( width*height*channels );
-    memcpy(img, result, width*height*channels);
-    
-    glGenTextures(1, &tex_2d); /* Note: sometimes glGenTextures fails (usually no OpenGL context)	*/
+        
+        // make it a texture
+        glGenTextures(1, &tex_2d); /* Note: sometimes glGenTextures fails (usually no OpenGL context)	*/
     glBindTexture( GL_TEXTURE_2D, tex_2d );
     
-    
-    //setup
-    //glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    // when texture area is small, bilinear filter the original
+    // bilinear filter the original
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
-    // when texture area is large, bilinear filter the original
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    
+    // stop image at edges, no repeat
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
-    //endsetup
     
     
     glTexImage2D(GL_TEXTURE_2D, 0,
                  GL_RGBA, width, height, 0,
-                 GL_BGRA, GL_UNSIGNED_BYTE, img );
+                 GL_RGBA, GL_UNSIGNED_BYTE, result );
     
     
     // get rid of img data
 	stbi_image_free(result);
-    
 }
 
 void ImageElement::drawElement()
 {
+    // Make sure to use the image texture
+    glBindTexture( GL_TEXTURE_2D, tex_2d );
+    
+    // Allow for transparent layers
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    
     glEnable(GL_TEXTURE_2D);
     
     glColor3f(1,1,1);

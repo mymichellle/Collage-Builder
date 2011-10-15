@@ -23,6 +23,9 @@ Collage::Collage()
     // Initial Page
     displayPage = new BasePage();
     
+    // Initialize Font
+    mainFont = new BaseFont(0);
+    
     numElements = 0;
 }
 
@@ -85,4 +88,9 @@ int Collage::getNumberOfElements()
 BaseElement* Collage::getElement(int index)
 {
     return elements[index];
+}
+
+BaseFont* Collage::getFont()
+{
+    return mainFont;
 }

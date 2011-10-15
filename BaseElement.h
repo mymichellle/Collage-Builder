@@ -129,13 +129,19 @@ protected:
     
 public:
     BaseElement();
+    
     void setPosition(int xpos, int ypos);
     void setWidth(int w, bool locked);
     void setHeight(int h, bool locked);
     void setRotation(float r);
     void setColor(float r, float g, float b);
+    
+    int getWidth();
+    int getHeight();
+    
     bool mouse(int button, int state, int xpops, int ypos);
     bool mouseMotion(int xpos, int ypos);
+    
     void draw();
 };
 

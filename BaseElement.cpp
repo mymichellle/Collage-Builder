@@ -71,6 +71,16 @@ void BaseElement::setHeight(int h, bool locked)
     height = h;
 }
 
+int BaseElement::getWidth()
+{
+    return width;
+}
+
+int BaseElement::getHeight()
+{
+    return height;
+}
+
 void BaseElement::setRotation(float r)
 {
     rotation = r;

@@ -17,8 +17,18 @@ class TextElement: public BaseElement
 private:
     std::string text;
     void drawElement();
+    double scaleX;
+    double scaleY;
+    
+    void setFontScale(double w, double h);
+    void updateDimensions();
+    //void setWidth(int w, bool locked);
+    //void setHeight(int h, bool locked);
+    
 public:
     TextElement(std::string s, int centerX, int centerY);
+    void setText(std::string s);
+    void setFontSize(double s);
 };
 
 #endif

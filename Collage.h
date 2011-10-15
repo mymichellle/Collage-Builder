@@ -11,6 +11,7 @@
 
 #include "BasePage.h"
 #include "BaseElement.h"
+#include "BaseFont.h"
 #include "Utility.h"
 #include <iostream>
 
@@ -26,6 +27,8 @@ private:
     BasePage *displayPage;
     BaseElement* elements[MAX_ELEMENTS];
     int numElements;
+    
+    BaseFont *mainFont;
     
 public:
     // Singleton Collage
@@ -47,6 +50,7 @@ public:
     
     int getNumberOfElements();
     BaseElement *getElement(int index);
+    BaseFont *getFont();
     
 };
 

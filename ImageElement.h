@@ -10,19 +10,19 @@
 #define ImageElement_h
 
 #include "BaseElement.h"
-//#include "Simple OpenGL Image Library/src/SOIL.h"
 #include "stb_image.h"
+#include <string>
 
 class ImageElement: public BaseElement
 {
 private:
     GLuint tex_2d;
     
-    unsigned char* img;
     void drawElement();
     
 public:
-    ImageElement();
+    ImageElement(std::string s, int w, int h);
+    void setImage(std::string s);
 };
 
 #endif

@@ -18,10 +18,20 @@ using namespace std;
 
 BaseDialog::BaseDialog(string t, string d, int centerX, int centerY)
 {
-    width = 100;
+    initialize(t,d,centerX, centerY, 100);
+}
+
+BaseDialog::BaseDialog(string t, string d, int centerX, int centerY, int w)
+{
+    initialize(t,d,centerX, centerY, w);
+}
+
+void BaseDialog::initialize(string t, string d, int centerX, int centerY, int w)
+{
+    width = w;
     height = 30;
-    x = centerX - width;
-    y = centerY - height;
+    x = centerX - width/2;
+    y = centerY - height/2;
     textX = x+5;
     textY = y+5;
     
@@ -29,8 +39,6 @@ BaseDialog::BaseDialog(string t, string d, int centerX, int centerY)
     pressed = false;
     
     label = t;
-    //strcpy(val, d.c_str());
-    //valLength = strlen(d.c_str());
     val = d;
     valLength = val.length();
 }
@@ -78,8 +86,11 @@ void BaseDialog::keyboard(unsigned char key, int x, int y)
         switch (key) {
             // Backspace
             case 8:
-                valLength--;
-                val.erase(valLength);
+                if(valLength > 0)
+                {
+                    valLength--;
+                    val.erase(valLength);
+                }
                 break;
                 
             // Enter
@@ -105,12 +116,12 @@ void BaseDialog::draw()
     if(active)
     {
         glColor3f(.75, .75, .75);
-        glutSetCursor(GLUT_CURSOR_TEXT);
+        //glutSetCursor(GLUT_CURSOR_TEXT);
     }
     else
     {
         glColor3f(.6,.6,.6);
-        glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+        //glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     }
     
     // Draw the box
