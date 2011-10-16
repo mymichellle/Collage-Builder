@@ -20,7 +20,7 @@ ImageElement::ImageElement(string s, int xpos, int ypos)
     z = 0;
     width = 256;
     height = 256;
-    color = new BaseColor(0,0,0,0);
+    color = new BaseColor(0,0,0,.75);
     rotation = 0;
     bounds = new BoundingBox(x, y, width, height, rotation);
     
@@ -42,30 +42,39 @@ void ImageElement::setImage(string s)
 {
     // Texture test
     int channels, force_channels = 0;
-   	unsigned char *result = stbi_load(s.c_str(),
-                                      &width, &height, &channels, force_channels );
+    int w = width, h = height;
+    
+    // Load the image
+   	unsigned char *result = stbi_load(s.c_str(),&w, &h, &channels, force_channels );
     if( result == NULL )
-	{
-        cout<<"TEST FAIL "<<stbi_failure_reason()<<endl;
-	} else
-        
-        // make it a texture
-        glGenTextures(1, &tex_2d); /* Note: sometimes glGenTextures fails (usually no OpenGL context)	*/
+    {
+        cout<<"Image Load Faild: "<<stbi_failure_reason()<<endl;
+	}
+    
+    // Get the new values for width and height
+    width = w;
+    height = h;
+    
+    // Need this for JPG images to be loaded
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    
+    // make it a texture
+    glGenTextures(1, &tex_2d); /* Note: sometimes glGenTextures fails (usually no OpenGL context)	*/
     glBindTexture( GL_TEXTURE_2D, tex_2d );
     
     // bilinear filter the original
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
     // stop image at edges, no repeat
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
     
-    
+    cout<<"Create a texture from "<<s<< endl;
     glTexImage2D(GL_TEXTURE_2D, 0,
                  GL_RGBA, width, height, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, result );
     
-    
+    cout<<"texture created from "<<s<< endl;
     // get rid of img data
 	stbi_image_free(result);
 }
@@ -81,7 +90,8 @@ void ImageElement::drawElement()
     
     glEnable(GL_TEXTURE_2D);
     
-    glColor3f(1,1,1);
+    // Set the overlay color with a 50% opacity
+    glColor4f(color->color.red,color->color.green,color->color.blue, color->color.alpha);
     
     glBegin( GL_QUADS );
     glTexCoord2f(0.0f,0.0f); glVertex2f(0.0f,height);

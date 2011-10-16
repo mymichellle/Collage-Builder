@@ -23,8 +23,8 @@ private:
     void setFontScale(double w, double h);
     void updateDimensions();
     void updateSize();
-    void setWidth(int w, bool locked);
-    void setHeight(int h, bool locked);
+    void setWidth(int w);
+    void setHeight(int h);
     
 public:
     TextElement(std::string s, int centerX, int centerY);

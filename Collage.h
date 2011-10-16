@@ -14,6 +14,7 @@
 #include "BaseFont.h"
 #include "Utility.h"
 #include <iostream>
+#include <string>
 
 #define MAX_ELEMENTS    20
 #define COLLAGE_MENU_HEIGHT     200
@@ -29,6 +30,9 @@ private:
     Collage(Collage const&);
     void operator=(Collage const&);
     
+    // Collage name
+    std::string name;
+    
     // Current page
     BasePage *displayPage;
     
@@ -42,6 +46,7 @@ private:
     
     // Collage States
     bool created;
+    bool randomized;
     
     // Default Img Values
     float defaultImgRotation;
@@ -65,12 +70,17 @@ public:
         return instance;
     }
     
+    // Start a new Collage
+    void createNewCollage(std::string n);
+    
+    // Pass user interactions into the program
     void mouse(int button, int state, int x, int y);
     void mouseMotion(int x, int y);
     void keyboard(unsigned char key, int x, int y);
     void display();
     void reshape(int w, int h);
     
+    // Modify the Collage
     void setDisplayPage(BasePage *newPage);
     void setDefaultValues(enum BaseElement::Type t, int w, int h, double s, float r, BaseColor *c);
     bool addElement(BaseElement *elem);
@@ -79,9 +89,11 @@ public:
     bool moveElementBackward(BaseElement *elem);
     void setupCollage();
     
+    // Display the Collage
     void drawElements();
     void drawElements(int offsetX, int offsetY);
     
+    // Get information about the Collage
     int getNumberOfElements();
     BaseElement *getElement(int index);
     BaseFont *getFont();
@@ -90,6 +102,8 @@ public:
     double getDefaultSize(enum BaseElement::Type t);
     int getDefaultWidth(enum BaseElement::Type t);
     int getDefaultHeight(enum BaseElement::Type t);
+    bool isCreated();
+    std::string getName();
 };
 
 #endif

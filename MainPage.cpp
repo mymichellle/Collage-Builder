@@ -22,23 +22,31 @@ using namespace std;
 
 MainPage::MainPage()
 {
-    btn_new = new BaseButton("New", WINDOW_WIDTH/2, WINDOW_HEIGHT - 150);
-    btn_load = new BaseButton("Load", WINDOW_WIDTH/2, WINDOW_HEIGHT - 250);
+    dialog_name = new BaseDialog("Name: ", "My Collage", WINDOW_WIDTH/2, WINDOW_HEIGHT -150, 200);
+    btn_new = new BaseButton("New", WINDOW_WIDTH/2, WINDOW_HEIGHT - 200);
+    dialog_file = new BaseDialog("Load: ", "... doesnt work!", WINDOW_WIDTH/2, WINDOW_HEIGHT -300, 200);
+    btn_load = new BaseButton("Load", WINDOW_WIDTH/2, WINDOW_HEIGHT - 350);
+    btn_continue = new BaseButton("Continue", WINDOW_WIDTH/2, WINDOW_HEIGHT - 450);
     
     title = "Collage Builder";
 }
 
 void MainPage::onNewPress()
 {
-    title = "onNewPress";
-    glutPostRedisplay();
+    // Reset the collage
+    Collage::sharedCollage().createNewCollage(dialog_name->getValue());
     Collage::sharedCollage().setDisplayPage(new CreatePage());
 }
 
 void MainPage::onLoadPress()
 {
-    title = "onLoadPress";
+    title = dialog_file->getValue();
     glutPostRedisplay();
+}
+
+void MainPage::onContinuePress()
+{
+    Collage::sharedCollage().setDisplayPage(new CreatePage());
 }
 
 void MainPage::mouse(int button, int state, int x, int y)
@@ -48,6 +56,17 @@ void MainPage::mouse(int button, int state, int x, int y)
         onNewPress();
     if(btn_load->mouse(button, state, x, y))
         onLoadPress();
+    if(Collage::sharedCollage().isCreated() && btn_continue->mouse(button, state, x, y))
+        onContinuePress();
+    
+    dialog_file->mouse(button, state, x, y);
+    dialog_name->mouse(button, state, x, y);
+}
+
+void MainPage::keyboard(unsigned char key, int x, int y)
+{
+    dialog_name->keyboard(key, x, y);
+    dialog_file->keyboard(key, x, y);
 }
 
 void MainPage::display()
@@ -62,6 +81,13 @@ void MainPage::display()
     // Draw the buttons
     btn_new->draw();
     btn_load->draw();
+    // Only display the continue button if a collage has already been started
+    if(Collage::sharedCollage().isCreated())
+        btn_continue->draw();
+    
+    // Draw the text boxes
+    dialog_name->draw();
+    dialog_file->draw();
     
     
     glFlush();

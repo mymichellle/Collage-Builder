@@ -22,6 +22,7 @@ BaseElement::BaseElement()
     height = 10;
     color = new BaseColor(0,0,0,0);
     rotation = 15;
+    lockRatio = false;
     bounds = new BoundingBox(x, y, width, height, rotation);
     
     // Movement properties
@@ -50,26 +51,34 @@ void BaseElement::setPosition(int xpos, int ypos)
     y = ypos;
 }
 
-void BaseElement::setWidth(int w, bool locked)
+void BaseElement::setWidth(int w)
 {
-    //cout<<"setWidth w = "<<w<<endl;
-    if(locked)
-    {
-        cout<<"LOCKED"<<endl;
-        double scale = w/width;
-        height = height*scale;
-    }
     width = w;
 }
 
-void BaseElement::setHeight(int h, bool locked)
+void BaseElement::setHeight(int h)
 {
-    if(locked)
-    {
-        double scale = h/height;
-        width = width * scale;
-    }
     height = h;
+}
+
+void BaseElement::setRotation(float r)
+{
+    rotation = r;
+}
+
+void BaseElement::setColor(float r, float g, float b)
+{
+    color->color.red = r, color->color.green = g, color->color.blue = b;
+}
+
+void BaseElement::setColor4(float r, float g, float b, float a)
+{
+    color->color.red = r, color->color.green = g, color->color.blue = b, color->color.alpha = a;
+}
+
+void BaseElement::setLockRatio(bool lock)
+{
+    lockRatio = lock;
 }
 
 int BaseElement::getWidth()
@@ -87,19 +96,14 @@ float BaseElement::getRotation()
     return rotation;
 }
 
+bool BaseElement::getLockRatio()
+{
+    return lockRatio;
+}
+
 BaseColor* BaseElement::getColor()
 {
     return color;
-}
-
-void BaseElement::setRotation(float r)
-{
-    rotation = r;
-}
-
-void BaseElement::setColor(float r, float g, float b)
-{
-    color->color.red = r, color->color.green = g, color->color.blue = b;
 }
 
 void BaseElement::deselect()
@@ -134,10 +138,6 @@ bool BaseElement::pointInBounds(int xCord, int yCord)
 // Returns true if the button was successfully clicked
 bool BaseElement::mouse(int button, int state, int xpos, int ypos)
 {
-    
-    //cout<<"BaseElement mouse button "<<button<<" state "<<state<<" ("<<xpos<<", "<<ypos<<")"<<endl;
-    //cout<<"bounds ("<<x<<", "<<y<<", "<<x+width<<", "<<y+height<<")"<<endl;
-
     if(button == GLUT_LEFT_BUTTON && pointInBounds(xpos,ypos))
     {        
         // Resize is available if element is already selected
@@ -187,7 +187,7 @@ bool BaseElement::mouse(int button, int state, int xpos, int ypos)
         selectedCorner = CNONE;
     }
     
-    // TODO: better checks if bounds needs to be updated this is too frequent
+    // update the actual bounds at the end of resize/rotate operations
     if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
         updateBounds();
     
@@ -219,58 +219,11 @@ bool BaseElement::mouseMotion(int xpos, int ypos)
         
         // resize is handled differently at each corner
         double resized[4];
-        bounds->calculateResize(xpos, ypos, selectedCorner, resized);
+        bounds->calculateResize(xpos, ypos, lockRatio, selectedCorner, resized);
         x = resized[0];
         y = resized[1];
-        setWidth(resized[2], false);
-        setHeight(resized[3], false);
-       // cout<<"Width and height " << w << " " << h<<endl<<endl;
-        /*
-        switch(selectedCorner)
-        {
-            case CBL:
-                // Origin x, y change
-                x = x - (startX - xpos);
-                y = y - (startY - ypos);
-                h = h + (startY - ypos);
-                w = w + (startX - xpos);
-                setWidth(w, false);
-                setHeight(h, false);
-                break;
-            case CBR:
-                // x stays the same, y changes
-                
-                y = y - (startY - ypos);
-                w = w + (xpos - startX);
-                h = h + (startY - ypos);
-                setWidth(w, false);
-                setHeight(h, false);
-                // Calculate the new origin, w and h
-                bounds->calculateResize(xpos, ypos, CBR, resized);
-                x = resized[0];
-                y = resized[1];
-                setWidth(resized[2], false);
-                setHeight(resized[3], false);
-                
-                break;
-            case CTR:
-                // Origin x, y stays the same
-                w = w + (xpos - startX);
-                h = h + (ypos - startY);
-                setWidth(w, false);
-                setHeight(h, false);
-                break;
-            case CTL:
-                // y stays the same, x changes
-                x = x - (startX - xpos);
-                w = w + (startX - xpos);
-                h = h + (ypos - startY);
-                setWidth(w, false);
-                setHeight(h, false);
-                break;
-            default:
-                break;
-        }*/
+        setWidth(resized[2]);
+        setHeight(resized[3]);
         
         // If a corner is moved no other action should be done to the object
         // save new mouse point
@@ -304,35 +257,31 @@ void BaseElement::draw()
             glRotatef(rotation, 0, 0, 1);
             
             // Set the color of the element
-            if(moveable)
-                glColor3f(0,0,1);
-            else if(selected)
-            {
-                glColor3f(0,1,0);
-            }
-            else
-                glColor3f(color->color.red,color->color.green,color->color.blue);
+            glColor3f(color->color.red,color->color.green,color->color.blue);
             glPointSize(1);
             
-            // Draw the Correct size
+            // Draw the Element
             drawElement();
-            
+           
             // Draw the bounding box corners if selected
-            if(selected)
+            if(selected || moveable)
             {
                 drawCorners();
-            }
+            }  
+    
         glPopMatrix();
     
     glFlush();
     glPopMatrix();
-        
-        
-    //DEBUG - Show Bounding Box
-    glPushMatrix();
-        bounds->draw();
-    glPopMatrix();
-    //DEBUG
+    
+    //DEBUG - bounds
+    /*if(selected || moveable)
+    {
+        glPushMatrix();
+        bounds->draw(selectedCorner);
+        glPopMatrix();
+    }*/
+    //DEBUG - bounds
 }
 
 void BaseElement::drawElement()
@@ -349,9 +298,9 @@ void BaseElement::drawCorners()
         
         // Set the color
         if(i == selectedCorner)
-            glColor3f(1,0,0);
+            glColor3f(0,1,0);
         else
-            glColor3f(1,0,1);
+            glColor3f(0,0,1);
         
         // Translate to the corner
         if(i == 0)
@@ -405,15 +354,6 @@ BoundingBox::BoundingBox(int x, int y, int w, int h, int a)
 
 bool BoundingBox::pointInBounds(int xp, int yp)
 {
-    /*cout << " check point (" << xp << ", " << yp << ")" << endl;
-    print();
-    cout << "left : " << checkLeft(xp, yp) << endl;
-    cout << "right : " << checkRight(xp, yp) << endl;
-    cout << "top : " << checkTop(xp, yp) << endl;
-    cout << "bottom : " << checkBottom(xp, yp) << endl;
-    cout << "sides : " << checkLeft(xp, yp) * checkRight(xp, yp) << endl;
-    cout << "tops : " << checkTop(xp, yp) * checkBottom(xp, yp) << endl;
-    */
     // Check if the point is in between the top bottom and side lines (all return 0 or negative)
     if(checkTop(xp,yp)<= 0 && 
        checkBottom(xp,yp) <= 0 && 
@@ -452,7 +392,7 @@ int BoundingBox::checkCorners(int xp, int yp)
     return CNONE;
 }
 
-void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
+void BoundingBox::calculateResize(int xp, int yp,bool locked, int corner, double *ans)
 {
     double  xn = 0, 
             yn = 0, 
@@ -486,6 +426,27 @@ void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
         if(height < 0)
             dh = dh*-1;
         
+        // If the aspect ratio is locked choose the bigger change and scale the other appropriately
+        if(locked)
+        {
+            if(fabs(dw) > fabs(dh))
+            {            
+                // Use dw, scale height proportionaly to find dh
+                double scale = (double)(dw+width)/width;
+                double h = height*scale;
+                
+                // The new dh
+                dh = h - height;
+            }else
+            {
+                double scale = (double)(dh+height)/height;
+                double w = width*scale;
+                
+                // The new dw
+                dw = w - width;
+            }
+        }
+        
         // New origin is (xp,yp)
         xO1 = xp;
         yO1 = yp;
@@ -513,6 +474,27 @@ void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
             dw = dw*-1;
         if(height < 0)
             dh = dh*-1;
+        
+        // If the aspect ratio is locked choose the bigger change and scale the other appropriately
+        if(locked)
+        {
+            if(fabs(dw) > fabs(dh))
+            {            
+                // Use dw, scale height proportionaly to find dh
+                double scale = (double)(dw+width)/width;
+                double h = height*scale;
+                
+                // The new dh
+                dh = h - height;
+            }else
+            {
+                double scale = (double)(dh+height)/height;
+                double w = width*scale;
+                
+                // The new dw
+                dw = w - width;
+            }
+        }
         
         // Calculate the new origin (xO1, yO1)
         xO1 = xO + dh * cos(angle - PI/2); // angle minus 90 degrees
@@ -543,6 +525,28 @@ void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
             dw = dw*-1;
         if(height < 0)
             dh = dh*-1;
+        
+        
+        // If the aspect ratio is locked choose the bigger change and scale the other appropriately
+        if(locked)
+        {
+            if(fabs(dw) > fabs(dh))
+            {            
+                // Use dw, scale height proportionaly to find dh
+                double scale = (double)(dw+width)/width;
+                double h = height*scale;
+                
+                // The new dh
+                dh = h - height;
+            }else
+            {
+                double scale = (double)(dh+height)/height;
+                double w = width*scale;
+                
+                // The new dw
+                dw = w - width;
+            }
+        }
         
         // Origin remains the same
         xO1 = xO;
@@ -575,30 +579,43 @@ void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
         if(height < 0)
             dh = dh*-1;
         
+        // If the aspect ratio is locked choose the bigger change and scale the other appropriately
+        if(locked)
+        {
+            if(fabs(dw) > fabs(dh))
+            {            
+                // Use dw, scale height proportionaly to find dh
+                double scale = (double)(dw+width)/width;
+                double h = height*scale;
+                
+                // The new dh
+                dh = h - height;
+            }else
+            {
+                double scale = (double)(dh+height)/height;
+                double w = width*scale;
+                
+                // The new dw
+                dw = w - width;
+            }
+        }
+        
         // Calculate the new origin (xO1, yO1)
         xO1 = xO + dw * cos(angle + PI); // 180 plus  angle
         yO1 = yO + dw * sin(angle + PI); // 180 plus angle
     }
     
-    
-    //print();
-   /* cout << "calculateResize : " << endl;
-    cout << "mouse : (" << xp << ", " << yp <<")"<<endl;
-    cout << "origin : (" << xO << ", " << yO <<")"<<endl;
-    cout << "new origin : (" << xO1 << ", " << yO1 <<")"<<endl;
-    cout << "dw, dh : (" << dw << ", " << dh <<")"<<endl;
-    cout << "xn, yn : (" << xn << ", " << yn <<")"<<endl<<endl;*/
-    
-    
+    /// final new origin width and height
     ans[0] = xO1;
     ans[1] = yO1;
     ans[2] = width + dw;
     ans[3] = height + dh;
+    
+    
 }
 
 double BoundingBox::calculateRotate(int xp1, int yp1, int xp2, int yp2)
 {
-    // TODO: convert to rotate around center...
     // Treat xO, yO as the origin
     double angle1 = atan2(xp1-xO, yp1-yO);
     double angle2 = atan2(xp2-xO, yp2-yO);
@@ -608,18 +625,35 @@ double BoundingBox::calculateRotate(int xp1, int yp1, int xp2, int yp2)
 }
 
 
-void BoundingBox::draw()
+void BoundingBox::draw(int selectedCorner)
 {
-    glColor3f(1,1,0);
+    // Corners are blue unless selected then green
+    if(selectedCorner == CBL)
+        glColor3f(0,1,0);
+    else
+        glColor3f(0,0,1);
     glRectf(xO- CORNER_SIZE/2,yO- CORNER_SIZE/2,xO+ CORNER_SIZE/2, yO + CORNER_SIZE/2);
     
+    if(selectedCorner == CBR)
+        glColor3f(0,1,0);
+    else
+        glColor3f(0,0,1);
     glRectf(xBR- CORNER_SIZE/2,yBR- CORNER_SIZE/2,xBR+ CORNER_SIZE/2, yBR + CORNER_SIZE/2);
     
+    if(selectedCorner == CTL)
+        glColor3f(0,1,0);
+    else
+        glColor3f(0,0,1);
     glRectf(xTL- CORNER_SIZE/2,yTL- CORNER_SIZE/2,xTL+ CORNER_SIZE/2, yTL + CORNER_SIZE/2);
     
+    if(selectedCorner == CTR)
+        glColor3f(0,1,0);
+    else
+        glColor3f(0,0,1);
     glRectf(xTR- CORNER_SIZE/2,yTR- CORNER_SIZE/2,xTR+ CORNER_SIZE/2, yTR + CORNER_SIZE/2);
     
-    glRectf(xC - 1, yC - 1, xC + 1, yC + 1);
+    //Center point
+    //glRectf(xC - 1, yC - 1, xC + 1, yC + 1);
 }
 
 void BoundingBox::setAngle(int a)

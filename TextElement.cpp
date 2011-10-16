@@ -76,25 +76,14 @@ void TextElement::setFontScale(double w, double h)
     updateDimensions();
 }
 
-void TextElement::setWidth(int w, bool locked)
+void TextElement::setWidth(int w)
 {
-    if(locked)
-    {
-        cout<<"LOCKED"<<endl;
-        double scale = w/width;
-        height = height*scale;
-    }
     width = w;
     updateSize();
 }
 
-void TextElement::setHeight(int h, bool locked)
+void TextElement::setHeight(int h)
 {
-    if(locked)
-    {
-        double scale = h/height;
-        width = width * scale;
-    }
     height = h;
     updateSize();
 }

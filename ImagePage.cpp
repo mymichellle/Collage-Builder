@@ -22,6 +22,9 @@ ImagePage::ImagePage()
     title = "Image";
     fileName = "Basketball.png";
     
+    // Initialize the element being defined
+    element = new ImageElement(fileName,0,0);
+    
     btn_save = new BaseButton("SAVE", WINDOW_WIDTH-75, WINDOW_HEIGHT - 50);
     btn_back = new BaseButton("BACK", 75, WINDOW_HEIGHT - 50);
     btn_load = new BaseButton("LOAD", WINDOW_WIDTH/2, WINDOW_HEIGHT - 150);
@@ -30,12 +33,11 @@ ImagePage::ImagePage()
     dialog_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-200);
     dialog_green = new BaseDialog("GREEN: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-250);
     dialog_blue = new BaseDialog("BLUE: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-300);
+    dialog_alpha = new BaseDialog("OPACITY: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-350);
     dialog_width = new BaseDialog("WIDTH: ", "100", 200, WINDOW_HEIGHT-200);
     dialog_height = new BaseDialog("HEIGHT: ", "100", 200, WINDOW_HEIGHT-250);
     dialog_rotation = new BaseDialog("ROTATION: ", "0",200, WINDOW_HEIGHT-300);
     
-    // Initialize the element being defined
-    element = new ImageElement(fileName,0,0);
 
     // Load the default values
     setDefaultValues();
@@ -49,9 +51,11 @@ void ImagePage::setDefaultValues()
     dialog_red->setValue(color->color.red*255);
     dialog_green->setValue(color->color.green*255);
     dialog_blue->setValue(color->color.blue*255);
+    dialog_alpha->setValue(color->color.alpha*255);
     dialog_width->setValue(Collage::sharedCollage().getDefaultWidth(BaseElement::IMAGE_ELEMENT));
     dialog_height->setValue(Collage::sharedCollage().getDefaultHeight(BaseElement::IMAGE_ELEMENT));
     dialog_rotation->setValue(Collage::sharedCollage().getDefaultRotation(BaseElement::IMAGE_ELEMENT));
+    
 }
 
 void ImagePage::mouse(int button, int state, int x, int y)
@@ -68,6 +72,7 @@ void ImagePage::mouse(int button, int state, int x, int y)
     dialog_red->mouse(button, state, x, y);
     dialog_blue->mouse(button, state, x,y);
     dialog_green->mouse(button, state, x,y);
+    dialog_alpha->mouse(button, state, x,y);
     dialog_width->mouse(button, state, x, y);
     dialog_height->mouse(button, state, x, y);
     dialog_rotation->mouse(button, state, x,y);
@@ -78,6 +83,7 @@ void ImagePage::keyboard(unsigned char key, int x, int y)
     dialog_file->keyboard(key, x, y);
     dialog_red->keyboard(key, x, y);
     dialog_blue->keyboard(key, x, y);
+    dialog_alpha->keyboard(key, x, y);
     dialog_green->keyboard(key, x, y);
     dialog_width->keyboard(key, x, y);
     dialog_height->keyboard(key, x, y);
@@ -102,18 +108,24 @@ void ImagePage::onLoadPress()
     // Assign the value in the dialog box to the file name when laod is pressed
     fileName = dialog_file->getValue();
     element->setImage(fileName);
+    
+    // Set width and height dialog boxes to the widht/height of new image
+    dialog_width->setValue(element->getWidth());
+    dialog_height->setValue(element->getHeight());
+    
     // redraw new image
     glutPostRedisplay();
 }
 
 void ImagePage::defineImageElement()
 {
-    element->setColor(atof(dialog_red->getValue().c_str())/255, 
+    element->setColor4(atof(dialog_red->getValue().c_str())/255, 
                       atof(dialog_green->getValue().c_str())/255,
-                      atof(dialog_blue->getValue().c_str())/255);
+                      atof(dialog_blue->getValue().c_str())/255,
+                      atof(dialog_alpha->getValue().c_str())/255);
     element->setRotation(atof(dialog_rotation->getValue().c_str()));
-    element->setWidth(atof(dialog_width->getValue().c_str()), false);
-    element->setHeight(atof(dialog_height->getValue().c_str()), false);
+    element->setWidth(atof(dialog_width->getValue().c_str()));
+    element->setHeight(atof(dialog_height->getValue().c_str()));
 }
 
 void ImagePage::display()
@@ -137,6 +149,7 @@ void ImagePage::display()
     dialog_file->draw();
     dialog_red->draw();
     dialog_blue->draw();
+    dialog_alpha->draw();
     dialog_green->draw();
     dialog_width->draw();
     dialog_height->draw();
@@ -148,11 +161,11 @@ void ImagePage::display()
     // translate to the middle of the screen
     glTranslatef(WINDOW_WIDTH/2, 10, 0);
     
-    // scale the image to fit in a 50x50 spot maintaining aspect ratio
-    double scalePrev = 50.0/element->getWidth();
-    if(scalePrev < 50.0/element->getHeight())
+    // scale the image to fit in a 100x100 spot maintaining aspect ratio
+    double scalePrev = 100.0/element->getWidth();
+    if(scalePrev < 100.0/element->getHeight())
     {
-        scalePrev = 50.0/element->getHeight();
+        scalePrev = 100.0/element->getHeight();
     }
     glScalef(scalePrev, scalePrev, 1);
     element->draw();

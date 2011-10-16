@@ -17,7 +17,7 @@ using namespace std;
 
 CollagePage::CollagePage()
 {    
-    title = "Collage";
+    title = Collage::sharedCollage().getName();
     activeElement = NULL;
     // Initialize or load the collage
     Collage::sharedCollage().setupCollage();
@@ -26,6 +26,7 @@ CollagePage::CollagePage()
     btn_delete = new BaseButton("DELTE", WINDOW_WIDTH-75, 50);
     btn_forward = new BaseButton("FORWARD", 300, COLLAGE_MENU_HEIGHT-50);
     btn_backward = new BaseButton("BACKWARD", 300, COLLAGE_MENU_HEIGHT - 125);
+    btn_lock = new BaseButton("LOCK RATIO", 410, COLLAGE_MENU_HEIGHT - 50);
     dialog_rotation = new BaseDialog("ROTATION: ", "0", 300, COLLAGE_MENU_HEIGHT - 175);
     dialog_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-50);
     dialog_green = new BaseDialog("GREEN: ", "0", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-100);
@@ -92,6 +93,8 @@ void CollagePage::mouse(int button, int state, int x, int y)
         onForwardPress();
     if(btn_backward->mouse(button, state, x, y))
         onBackwardPress();
+    if(btn_lock->mouse(button, state, x,y))
+        onLockPress();
     
     //Pass mouse onto text boxes
     dialog_red->mouse(button, state, x, y);
@@ -132,6 +135,12 @@ void CollagePage::onBackwardPress()
 {
     if(activeElement != NULL)
         Collage::sharedCollage().moveElementBackward(activeElement);
+}
+
+void CollagePage::onLockPress()
+{
+    if(activeElement != NULL)
+        activeElement->setLockRatio(!activeElement->getLockRatio());
 }
 
 void CollagePage::updateActiveElement()
@@ -185,6 +194,7 @@ void CollagePage::display()
         btn_delete->draw();
         btn_forward->draw();
         btn_backward->draw();
+        btn_lock->draw();
         dialog_red->draw();
         dialog_green->draw();
         dialog_blue->draw();

@@ -28,6 +28,7 @@ class ImagePage: public BasePage
     BaseDialog *dialog_red;
     BaseDialog *dialog_green;
     BaseDialog *dialog_blue;
+    BaseDialog *dialog_alpha;
     BaseDialog *dialog_rotation;
     BaseDialog *dialog_width;
     BaseDialog *dialog_height;

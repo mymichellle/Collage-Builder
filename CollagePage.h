@@ -20,6 +20,7 @@ class CollagePage: public BasePage
     BaseButton *btn_delete;
     BaseButton *btn_forward;
     BaseButton *btn_backward;
+    BaseButton *btn_lock;
     BaseDialog *dialog_red;
     BaseDialog *dialog_green;
     BaseDialog *dialog_blue;
@@ -30,6 +31,7 @@ class CollagePage: public BasePage
     void onDeletePress();
     void onForwardPress();
     void onBackwardPress();
+    void onLockPress();
     
     BaseElement *activeElement;
     void updateActiveElement();

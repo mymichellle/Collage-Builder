@@ -29,11 +29,10 @@ public:
     void setDimensions(int w, int h);
     
     // Calculations
-    void calculateResize(int xp, int yp, int corner, double *ans);
+    void calculateResize(int xp, int yp, bool locked, int corner, double *ans);
     double calculateRotate(int xp1, int yp1, int xp2, int yp2);
     
-    // Debug
-    void draw();
+    void draw(int selectedCorner);
     
     static const int numCorners = 4;
     
@@ -66,9 +65,6 @@ private:
         CTL,
         CNONE
     };
-    //CornerBox *corners[numCorners];
-    //void setCorners();
-    //enum CornerType selectedCorner;
     
     // Debug
     void print();
@@ -116,6 +112,7 @@ protected:
     bool selected;
     bool moveable;
     bool rotateable;
+    bool lockRatio;
     
     // Manipulation Variables
     int startX;
@@ -131,15 +128,18 @@ public:
     BaseElement();
     
     void setPosition(int xpos, int ypos);
-    virtual void setWidth(int w, bool locked);
-    virtual void setHeight(int h, bool locked);
+    virtual void setWidth(int w);
+    virtual void setHeight(int h);
     void setRotation(float r);
     void setColor(float r, float g, float b);
+    void setColor4(float r, float g, float b, float a);
+    void setLockRatio(bool lock);
     void deselect();
     
     int getWidth();
     int getHeight();
     float getRotation();
+    bool getLockRatio();
     BaseColor* getColor();
     
     bool mouse(int button, int state, int xpops, int ypos);

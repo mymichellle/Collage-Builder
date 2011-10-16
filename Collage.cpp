@@ -13,6 +13,8 @@
 
 #include "Collage.h"
 
+using namespace std;
+
 Collage::Collage()
 {
     // Set color to white
@@ -31,6 +33,7 @@ Collage::Collage()
     
     numElements = 0;
     created = false;
+    randomized = false;
 }
 
 void Collage::display(void)
@@ -66,6 +69,27 @@ void Collage::setDisplayPage(BasePage *newPage)
     glutPostRedisplay();
 }
 
+void Collage::createNewCollage(string n)
+{
+    // Assign the new name
+    name = n;
+    
+    // Remove any elements
+    for(int i = 0; i < numElements; i++)
+    {
+        elements[i] = NULL;
+    }
+    numElements = 0;
+    
+    // Reset default values
+    setDefaultValues(BaseElement::IMAGE_ELEMENT, 100,100,1,0,new BaseColor(1,1,1,.75f));
+    setDefaultValues(BaseElement::TEXT_ELEMENT, 1,1,1,0,new BaseColor(0,0,0,0));
+    
+    // Reset states
+    created = true;
+    randomized = false;
+}
+
 void Collage::setDefaultValues(enum BaseElement::Type t, int w, int h, double s, float r, BaseColor *c)
 {
     if(t == BaseElement::IMAGE_ELEMENT)
@@ -85,7 +109,6 @@ void Collage::setDefaultValues(enum BaseElement::Type t, int w, int h, double s,
         defaultTextHeight = h;
     }
 }
-
 
 bool Collage::addElement(BaseElement *elem)
 {
@@ -171,9 +194,9 @@ void Collage::setupCollage()
 {
     // If this is the first time the collage is displayed
     // Randomize the location of elements
-    if(!created)
+    if(!randomized)
     {
-        created = true;
+        randomized = true;
         int w, h;
         for(int i = 0; i < numElements; i++)
         {
@@ -261,4 +284,14 @@ int Collage::getDefaultHeight(enum BaseElement::Type t)
         return defaultTextHeight;
     else
         return 0;
+}
+
+bool Collage::isCreated()
+{
+    return created;
+}
+
+string Collage::getName()
+{
+    return name;
 }
