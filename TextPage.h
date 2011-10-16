@@ -33,6 +33,7 @@ private:
     void onBackPress();
     
     void defineTextElement();
+    void setDefaultValues();
 
 public:
     TextPage();

@@ -37,6 +37,21 @@ ImagePage::ImagePage()
     // Initialize the element being defined
     element = new ImageElement(fileName,0,0);
 
+    // Load the default values
+    setDefaultValues();
+}
+
+void ImagePage::setDefaultValues()
+{
+    // Load the Collages default settings
+    BaseColor *color = Collage::sharedCollage().getDefaultColor(BaseElement::IMAGE_ELEMENT);
+    
+    dialog_red->setValue(color->color.red*255);
+    dialog_green->setValue(color->color.green*255);
+    dialog_blue->setValue(color->color.blue*255);
+    dialog_width->setValue(Collage::sharedCollage().getDefaultWidth(BaseElement::IMAGE_ELEMENT));
+    dialog_height->setValue(Collage::sharedCollage().getDefaultHeight(BaseElement::IMAGE_ELEMENT));
+    dialog_rotation->setValue(Collage::sharedCollage().getDefaultRotation(BaseElement::IMAGE_ELEMENT));
 }
 
 void ImagePage::mouse(int button, int state, int x, int y)

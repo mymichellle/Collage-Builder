@@ -43,6 +43,20 @@ private:
     // Collage States
     bool created;
     
+    // Default Img Values
+    float defaultImgRotation;
+    BaseColor *defaultImgColor;
+    double defaultImgSize;
+    int defaultImgWidth;
+    int defaultImgHeight;
+    
+    // Default Text Values
+    float defaultTextRotation;
+    BaseColor *defaultTextColor;
+    double defaultTextSize;
+    int defaultTextWidth;
+    int defaultTextHeight;
+    
 public:
     // Singleton Collage
     static Collage& sharedCollage()
@@ -58,6 +72,7 @@ public:
     void reshape(int w, int h);
     
     void setDisplayPage(BasePage *newPage);
+    void setDefaultValues(enum BaseElement::Type t, int w, int h, double s, float r, BaseColor *c);
     bool addElement(BaseElement *elem);
     bool removeElement(BaseElement *elem);
     bool moveElementForward(BaseElement *elem);
@@ -70,7 +85,11 @@ public:
     int getNumberOfElements();
     BaseElement *getElement(int index);
     BaseFont *getFont();
-    
+    float getDefaultRotation(enum BaseElement::Type t);
+    BaseColor* getDefaultColor(enum BaseElement::Type t);
+    double getDefaultSize(enum BaseElement::Type t);
+    int getDefaultWidth(enum BaseElement::Type t);
+    int getDefaultHeight(enum BaseElement::Type t);
 };
 
 #endif

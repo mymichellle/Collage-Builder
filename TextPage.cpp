@@ -8,6 +8,7 @@
 
 #include <GL/glut.h>
 #include <GLUT/glut.h>
+#include <sstream>
 
 #include "TextPage.h"
 #include "Utility.h"
@@ -33,6 +34,21 @@ TextPage::TextPage()
     
     // Initialize the element being defined
     element = new TextElement(dialog_text->getValue(),150,10);
+    
+    // Load default values
+    setDefaultValues();
+}
+
+void TextPage::setDefaultValues()
+{
+    // Load the Collages default settings
+    BaseColor *color = Collage::sharedCollage().getDefaultColor(BaseElement::TEXT_ELEMENT);
+    
+    dialog_red->setValue(color->color.red*255);
+    dialog_green->setValue(color->color.green*255);
+    dialog_blue->setValue(color->color.blue*255);
+    dialog_size->setValue(Collage::sharedCollage().getDefaultSize(BaseElement::TEXT_ELEMENT));
+    dialog_rotation->setValue(Collage::sharedCollage().getDefaultRotation(BaseElement::TEXT_ELEMENT));
 }
 
 void TextPage::mouse(int button, int state, int x, int y)

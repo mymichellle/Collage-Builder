@@ -116,12 +116,6 @@ bool BaseElement::pointInBounds(int xCord, int yCord)
     if( selected )
     {
         selectedCorner = (CornerType)bounds->checkCorners(xCord, yCord);
-        /*selectedCorner = CNONE;
-        for(int i = 0; i < numCorners; i++)
-        {
-            if( corners[i]->pointInBounds(xCord, yCord) )
-                selectedCorner = (CornerType)i;
-        }*/
     }
     else
     {
@@ -314,7 +308,6 @@ void BaseElement::draw()
                 glColor3f(0,0,1);
             else if(selected)
             {
-                cout<<"set selected colors"<<endl;
                 glColor3f(0,1,0);
             }
             else
@@ -327,7 +320,6 @@ void BaseElement::draw()
             // Draw the bounding box corners if selected
             if(selected)
             {
-                cout<<"draw corners"<<endl;
                 drawCorners();
             }
         glPopMatrix();
@@ -407,7 +399,7 @@ BoundingBox::BoundingBox(int x, int y, int w, int h, int a)
     yO = y;
     width = w;
     height = h;
-    angle =  a * PI/180; // convert to radians
+    setAngle( a ); // convert to radians
     calculateBounds();
 }
 
@@ -422,19 +414,11 @@ bool BoundingBox::pointInBounds(int xp, int yp)
     cout << "sides : " << checkLeft(xp, yp) * checkRight(xp, yp) << endl;
     cout << "tops : " << checkTop(xp, yp) * checkBottom(xp, yp) << endl;
     */
-    
-    // Special case angle is 0, 90, 180, 270, 360..
-    if(angle == 0)
-    {
-        if( xO <= xp && xp <= xO + width && 
-           yO <= yp && yp <= yO+height)
-            return true;
-        else
-            return false;
-    }
-    
-    // Check if the point is in between the top bottom and side lines
-    if(checkTop(xp,yp)*checkBottom(xp,yp) < 0 && checkLeft(xp,yp)*checkRight(xp,yp) < 0)
+    // Check if the point is in between the top bottom and side lines (all return 0 or negative)
+    if(checkTop(xp,yp)<= 0 && 
+       checkBottom(xp,yp) <= 0 && 
+       checkLeft(xp,yp)<=0 &&
+       checkRight(xp,yp) <= 0)
         return true;
     
     return false;
@@ -443,21 +427,26 @@ bool BoundingBox::pointInBounds(int xp, int yp)
 int BoundingBox::checkCorners(int xp, int yp)
 {
     // Check if the point is CORNER_SIZE away from a corner point
+    double distance;
     
     // Bottom Left
-    if( sqrt( (xp - xO)*(xp-xO) + (yp - xO)*(yp - yO) ) < CORNER_SIZE )
+    distance = sqrt( pow((xp - xO), 2) + pow((yp - yO), 2) );
+    if( distance < CORNER_SIZE )
         return CBL;
     
     // Bottom Right
-    if( sqrt( (xp - xBR)*(xp-xBR) + (yp - xBR)*(yp - yBR) ) < CORNER_SIZE )
+    distance = sqrt( pow((xp - xBR), 2) + pow((yp - yBR), 2) );
+    if( distance < CORNER_SIZE )
         return CBR;
     
     // Top Left
-    if( sqrt( (xp - xTL)*(xp-xTL) + (yp - xTL)*(yp - yTL) ) < CORNER_SIZE )
+    distance = sqrt( pow((xp - xTL), 2) + pow((yp - yTL), 2) );
+    if( distance < CORNER_SIZE )
         return CTL;
     
     // Top Right
-    if( sqrt( (xp - xTR)*(xp-xTR) + (yp - xTR)*(yp - yTR) ) < CORNER_SIZE )
+    distance = sqrt( pow((xp - xTR), 2) + pow((yp - yTR), 2) );
+    if( distance < CORNER_SIZE )
         return CTR;
     
     return CNONE;
@@ -472,25 +461,31 @@ void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
             xO1 = 0,
             yO1 = 0;
     
-    // TODO: handle 0 case..
-    
     if(corner == CBL)
     {
+        
         // Find intersection (xn, yn) of two lines
         // bottom of element and perpendicular line going through (xp, yp)
         xn = (mainSlope * xp - sideSlope * xO - yp + yO) / (mainSlope - sideSlope);
         yn = mainSlope * (xn - xp) + yp;
         
         // Calculate the change in width and height (dw, dh)
-        dh = sqrt( (xO - xn)*(xO - xn) + (yO - yn)*(yO - yn) );
-        dw = sqrt( (xp - xn)*(xp - xn) + (yp - yn)*(yp - yn) );
+        dh = sqrt( pow((xO - xn),2) + pow((yO - yn),2) );
+        dw = sqrt( pow((xp - xn),2) + pow((yp - yn),2) );
         
-        // Retain the direction of the change
-        if(checkLeft(xp, yp) > 0)
+        // If the point is inside the box (negative value from checkLeft/Bottom)
+        // The size is getting smaller
+        if(checkLeft(xp, yp) < 0)
             dw = dw * -1;
-        if(checkBottom(xp, yp) > 0)
+        if(checkBottom(xp, yp) < 0)
             dh = dh * -1;
-
+        
+        // if width/ height is negative invert the dw/dh
+        if(width < 0)
+            dw = dw*-1;
+        if(height < 0)
+            dh = dh*-1;
+        
         // New origin is (xp,yp)
         xO1 = xp;
         yO1 = yp;
@@ -507,11 +502,17 @@ void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
         dh = sqrt( (xBR - xn)*(xBR - xn) + (yBR - yn)*(yBR - yn) );
         dw = sqrt( (xp - xn)*(xp - xn) + (yp - yn)*(yp - yn) );
         
-        // Retain the direction of the change
+        // If the point is inside the right or bottom then the shape is getting smaller dw/dh should be negative
         if(checkRight(xp, yp) < 0)
             dw = dw * -1;
-        if(checkBottom(xp, yp) > 0)
+        if(checkBottom(xp, yp) < 0)
             dh = dh * -1;
+        
+        // if width/ height is negative invert the dw/dh
+        if(width < 0)
+            dw = dw*-1;
+        if(height < 0)
+            dh = dh*-1;
         
         // Calculate the new origin (xO1, yO1)
         xO1 = xO + dh * cos(angle - PI/2); // angle minus 90 degrees
@@ -525,15 +526,23 @@ void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
         xn = (mainSlope * xp - sideSlope * xTR - yp + yTR) / (mainSlope - sideSlope);
         yn = mainSlope * (xn - xp) + yp;
         
+        
         // Calculate the change in width and height (dw, dh)
         dh = sqrt( (xTR - xn)*(xTR - xn) + (yTR - yn)*(yTR - yn) );
         dw = sqrt( (xp - xn)*(xp - xn) + (yp - yn)*(yp - yn) );
         
-        // Retain the direction of the change
-        if(checkRight(xp, yp) < 0)
+        // Retain the direction of the change 
+        // Acts opposite if angle is below the x axis
+        if(checkRight(xp, yp) < 0)// && angle > 0 && angle < 180 || checkRight(xp, yp) > 0 && angle >180)
             dw = dw * -1;
-        if(checkTop(xp, yp) < 0)
+        if(checkTop(xp, yp) < 0 )//&& angle > 0 && angle < 180)
             dh = dh * -1;
+        
+        // if width/ height is negative invert the dw/dh
+        if(width < 0)
+            dw = dw*-1;
+        if(height < 0)
+            dh = dh*-1;
         
         // Origin remains the same
         xO1 = xO;
@@ -547,19 +556,28 @@ void BoundingBox::calculateResize(int xp, int yp, int corner, double *ans)
         xn = (sideSlope * xTL - mainSlope * xp + yp - yTL) / (sideSlope - mainSlope);
         yn = yp - mainSlope * (xp - xn);
         
+        
         // Calculate the change in width and height (dw, dh)
         dh = sqrt( (xn - xTL)*(xn - xTL) + (yn - yTL)*(yn - yTL) );
         dw = sqrt( (xp - xn)*(xp - xn) + (yp - yn)*(yp - yn) );
         
-        // Retain the direction of the change
-        if(checkLeft(xp, yp) > 0)
+        
+        // If the point is inside the box (negative value from checkLeft/Top)
+        // The size is getting smaller
+        if(checkLeft(xp, yp) < 0)
             dw = dw * -1;
         if(checkTop(xp, yp) < 0)
             dh = dh * -1;
         
+        // if width/ height is negative invert the dw/dh
+        if(width < 0)
+            dw = dw*-1;
+        if(height < 0)
+            dh = dh*-1;
+        
         // Calculate the new origin (xO1, yO1)
-        xO1 = xO + dw * cos(angle + PI); // 180 minus angle
-        yO1 = yO + dw * sin(angle + PI); // 180 minus angle
+        xO1 = xO + dw * cos(angle + PI); // 180 plus  angle
+        yO1 = yO + dw * sin(angle + PI); // 180 plus angle
     }
     
     
@@ -606,7 +624,29 @@ void BoundingBox::draw()
 
 void BoundingBox::setAngle(int a)
 {
-    angle = a * PI/180; // convert to radians
+    // correct angle to be between -360 to 360
+    if(a >= 360 || a <= -360)
+    {
+        a - (360 * a/360);
+    }
+    
+    // correct angle further to be between 0 <= angle < 360
+    if(a < 0)
+    {
+        a = 360 + a;
+    }
+    
+    if(a == 360)
+        a = 0;
+    
+    // if angle is 180 or 90 set it to exactly PI or PI/2
+    if(a == 180)
+        angle = PI;
+    else if( a == 90)
+        angle = PI/2;
+    else
+        angle = a * PI/180; // convert to radians
+    
     calculateBounds();
 }
 
@@ -651,27 +691,137 @@ void BoundingBox::calculateBounds()
 /* Based on equation of a line y = mx + b
  * Returns:
  *  0 - point is on line
- *  positive - point is above line
- *  negative - point is below line
+ *  negative - if point is on the element side of the line
+ *  positive - if point is on the outside of the line
  */
 int BoundingBox::checkBottom(int xp, int yp)
 {
-    return yp - mainSlope * xp - offsetB;
+    // return negative or 0 if the point is inside the right bottom of the box
+    int calc = yp - mainSlope * xp - offsetB; // equation of the top side 0 = y - mx - b
+    
+    // If the height is negative the image has been flipped and calculations will be opposite
+    if(height<0)
+    {
+        calc = -1*calc;
+    }
+    
+    if(angle >= 0 && angle < PI/2 || angle > 3*PI/2 && angle < 2*PI)
+    {
+        // First & 4th Quadrants
+        return -1*calc; 
+    }
+    else if(angle > PI/2 && angle < 3*PI/2)
+    {
+        // When the box is flipped side to side the line equations are opposite
+        return calc; 
+    }
+    else if(angle == PI/2)
+    {
+        // Special case when angle is 90 degrees because bottom is a vertical line
+        return xp - xO;
+    }
+    else // angle is 270 degrees
+    {
+        // Special case when angle 270 degrees because bottom is a vertical line
+        return xO - xp;
+    }
 }
 
 int BoundingBox::checkTop(int xp, int yp)
 {
-    return yp - mainSlope * xp - offsetT;
+    // return negative or 0 if the point is inside the top side of the box
+    int calc = yp - mainSlope * xp - offsetT; // equation of the top side 0 = y - mx - b
+    
+    // If the height is negative the image has been flipped and calculations will be opposite
+    if(height<0)
+    {
+        calc = -1*calc;
+    }
+    
+    // First & 4th Quadrants
+    if(angle >= 0 && angle < PI/2 || angle > 3*PI/2 && angle < 2*PI)
+    {
+        return calc; 
+    }
+    else if(angle > PI/2 && angle < 3*PI/2)
+    {
+        return -1*calc; // When the box is flipped side to side the line equations are opposite
+    }
+    else if(angle == PI/2)
+    {
+        // Special case when angle is 90 degrees because top is a vertical line
+        return xTR - xp;
+    }
+    else // angle is 270 degrees
+    {
+        // Special case when angle 270 degrees because top is a vertical line
+        return xp - xTR;
+    }
 }
 
 int BoundingBox::checkLeft(int xp, int yp)
 {
-    return yp - sideSlope * xp - offsetL;
+    // return negative or 0 if the point is inside the left side of the box
+    int calc = yp - sideSlope * xp - offsetL; // equation of the right side 0 = y - mx - b
+    
+    // If the width is negative the image has been flipped and calculations will be opposite
+    if(width<0)
+    {
+        calc = -1*calc;
+    }
+    
+    // First & Second Quadrants
+    if(angle > 0 && angle < PI)
+    {
+        return -1*calc; 
+    }
+    else if(angle > PI && angle < 2*PI)
+    {
+        return calc; // When the box is flipped upside down the line equations are opposite
+    }
+    else if(angle == 0)
+    {
+        // Special case when angle is 0 degrees because the side is a vertical line
+        return xO - xp;
+    }
+    else
+    {
+        // Special case when angle is 180 degrees because the side is a vertical line
+        return xp - xO;
+    }
 }
 
 int BoundingBox::checkRight(int xp, int yp)
 {
-    return yp - sideSlope * xp - offsetR;
+    // return negative or 0 if the point is inside the right side of the box
+    int calc = yp - sideSlope * xp - offsetR; // equation of the right side 0 = y - mx - b
+    
+    // If the width is negative the image has been flipped and calculations will be opposite
+    if(width<0)
+    {
+        calc = -1*calc;
+    }
+    
+    // First & Second Quadrants
+    if(angle > 0 && angle < PI)
+    {
+        return calc; 
+    }
+    else if(angle > PI && angle < 2*PI)
+    {
+        // When the box is flipped upside down the line equations are opposite
+        return -1*calc;
+    }
+    else if(angle == 0)
+    {
+        // Special case when angle is 0 degrees because the side is a vertical line
+        return xp - xBR;
+    }
+    else
+    {
+        // Special case when angle is 180 degrees because the side is a vertical line
+        return xBR - xp;
+    }
 }
 
 void BoundingBox::print()

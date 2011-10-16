@@ -24,8 +24,8 @@ CollagePage::CollagePage()
     
     btn_back = new BaseButton("BACK", 75, 50);
     btn_delete = new BaseButton("DELTE", WINDOW_WIDTH-75, 50);
-    btn_forward = new BaseButton("ELEMENT FORWARD", 300, COLLAGE_MENU_HEIGHT-50);
-    btn_backward = new BaseButton("ELEMENT BACKWARD", 300, COLLAGE_MENU_HEIGHT - 125);
+    btn_forward = new BaseButton("FORWARD", 300, COLLAGE_MENU_HEIGHT-50);
+    btn_backward = new BaseButton("BACKWARD", 300, COLLAGE_MENU_HEIGHT - 125);
     dialog_rotation = new BaseDialog("ROTATION: ", "0", 300, COLLAGE_MENU_HEIGHT - 175);
     dialog_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-50);
     dialog_green = new BaseDialog("GREEN: ", "0", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-100);
@@ -78,6 +78,9 @@ void CollagePage::mouse(int button, int state, int x, int y)
                 }
             }
         }
+        
+        if(!selectedElement)
+            activeElement = NULL;
     }
     
     // Check for button presses
@@ -177,13 +180,16 @@ void CollagePage::display()
     
     // Draw buttons and text boxes
     btn_back->draw();
-    btn_delete->draw();
-    btn_forward->draw();
-    btn_backward->draw();
-    dialog_red->draw();
-    dialog_green->draw();
-    dialog_blue->draw();
-    dialog_rotation->draw();
+    if(activeElement != NULL)
+    {
+        btn_delete->draw();
+        btn_forward->draw();
+        btn_backward->draw();
+        dialog_red->draw();
+        dialog_green->draw();
+        dialog_blue->draw();
+        dialog_rotation->draw();
+    }
     
     glFlush();
     glPopMatrix();

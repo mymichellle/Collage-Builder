@@ -37,6 +37,7 @@ class ImagePage: public BasePage
     void onLoadPress();
     
     void defineImageElement();
+    void setDefaultValues();
   
 public:
     ImagePage();

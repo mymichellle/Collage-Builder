@@ -160,6 +160,7 @@ string BaseDialog::getValue()
 void BaseDialog::setValue(string s)
 {
     val = s;
+    valLength = val.length();
 }
 
 void BaseDialog::setValue(float f)
@@ -167,6 +168,7 @@ void BaseDialog::setValue(float f)
     ostringstream buffer;
     buffer<<f;
     val = buffer.str();
+    valLength = val.length();
 }
 
 bool BaseDialog::pointInBounds(int xCord, int yCord)

@@ -11,7 +11,7 @@
 
 #include "Utility.h"
 
-#define CORNER_SIZE 5
+#define CORNER_SIZE 10
 #define PI 3.14159265
 
 class BoundingBox
@@ -78,12 +78,12 @@ private:
 
 class BaseElement
 {
-protected:
+public:
     enum Type{
         IMAGE_ELEMENT,
         TEXT_ELEMENT
     };
-
+protected:
     // Coordinates lower left
     int x;
     int y;

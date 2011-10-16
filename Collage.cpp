@@ -25,6 +25,10 @@ Collage::Collage()
     // Initialize Font
     mainFont = new BaseFont(0);
     
+    // Initialize default values
+    setDefaultValues(BaseElement::IMAGE_ELEMENT, 100,100,1,0,new BaseColor(0,0,0,0));
+    setDefaultValues(BaseElement::TEXT_ELEMENT, 1,1,1,0,new BaseColor(0,0,0,0));
+    
     numElements = 0;
     created = false;
 }
@@ -61,6 +65,27 @@ void Collage::setDisplayPage(BasePage *newPage)
     displayPage = newPage;
     glutPostRedisplay();
 }
+
+void Collage::setDefaultValues(enum BaseElement::Type t, int w, int h, double s, float r, BaseColor *c)
+{
+    if(t == BaseElement::IMAGE_ELEMENT)
+    {
+        defaultImgRotation = r;
+        defaultImgColor = c;
+        defaultImgSize = s;
+        defaultImgWidth = w;
+        defaultImgHeight = h;
+    }
+    else if(t == BaseElement::TEXT_ELEMENT)
+    {
+        defaultTextRotation = r;
+        defaultTextColor = c;
+        defaultTextSize = s;
+        defaultTextWidth = w;
+        defaultTextHeight = h;
+    }
+}
+
 
 bool Collage::addElement(BaseElement *elem)
 {
@@ -148,7 +173,13 @@ void Collage::setupCollage()
     // Randomize the location of elements
     if(!created)
     {
-        
+        created = true;
+        int w, h;
+        for(int i = 0; i < numElements; i++)
+        {
+            // generate a random position at least 50 pixels away from the edges
+            elements[i]->setPosition(rand() % (COLLAGE_DISPLAY_WIDTH - 100) + 50, rand()%(COLLAGE_DISPLAY_HEIGHT - 100)+50);
+        }
     }
 }
 
@@ -180,4 +211,54 @@ BaseElement* Collage::getElement(int index)
 BaseFont* Collage::getFont()
 {
     return mainFont;
+}
+
+float Collage::getDefaultRotation(enum BaseElement::Type t)
+{
+    if(t == BaseElement::IMAGE_ELEMENT)
+        return defaultImgRotation;
+    else if( t == BaseElement::TEXT_ELEMENT)
+        return defaultTextRotation;
+    else
+        return 0;
+}
+
+BaseColor* Collage::getDefaultColor(enum BaseElement::Type t)
+{
+    if(t == BaseElement::IMAGE_ELEMENT)
+        return defaultImgColor;
+    else if( t == BaseElement::TEXT_ELEMENT)
+        return defaultTextColor;
+    else
+        return new BaseColor(0,0,0,1);
+}
+
+double Collage::getDefaultSize(enum BaseElement::Type t)
+{
+    if(t == BaseElement::IMAGE_ELEMENT)
+        return defaultImgSize;
+    else if( t == BaseElement::TEXT_ELEMENT)
+        return defaultTextSize;
+    else
+        return 0;
+}
+
+int Collage::getDefaultWidth(enum BaseElement::Type t)
+{
+    if(t == BaseElement::IMAGE_ELEMENT)
+        return defaultImgWidth;
+    else if( t == BaseElement::TEXT_ELEMENT)
+        return defaultTextRotation;
+    else
+        return 0;
+}
+
+int Collage::getDefaultHeight(enum BaseElement::Type t)
+{
+    if(t == BaseElement::IMAGE_ELEMENT)
+        return defaultImgHeight;
+    else if( t == BaseElement::TEXT_ELEMENT)
+        return defaultTextHeight;
+    else
+        return 0;
 }
