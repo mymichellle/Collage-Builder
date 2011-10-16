@@ -22,8 +22,8 @@ public:
     BaseFont(int t);
     void draw(std::string);
     void draw(std::string, double scalex, double scaley);
-    int calculateWidth(std::string);
-    int calculateHeight(std::string);
+    int calculateWidth(std::string, double scalex);
+    int calculateHeight(std::string, double scaley);
     
 private:
     int type;

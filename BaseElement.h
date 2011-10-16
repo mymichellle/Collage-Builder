@@ -131,8 +131,8 @@ public:
     BaseElement();
     
     void setPosition(int xpos, int ypos);
-    void setWidth(int w, bool locked);
-    void setHeight(int h, bool locked);
+    virtual void setWidth(int w, bool locked);
+    virtual void setHeight(int h, bool locked);
     void setRotation(float r);
     void setColor(float r, float g, float b);
     void deselect();

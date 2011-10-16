@@ -50,20 +50,20 @@ BaseFont::BaseFont(int t)
     readInMap("font.dat");
 }
 
-int BaseFont::calculateWidth(string s)
+int BaseFont::calculateWidth(string s, double scalex)
 {
     int calcW = 0;
     for(int i = 0; i < s.length(); i++)
     {
         // Find the char map offset by the start character
-        calcW += charMap[s[i]-START_CHARACTERS].width;
+        calcW += charMap[s[i]-START_CHARACTERS].width*scalex;
     }
     return calcW;
 }
 
-int BaseFont::calculateHeight(string s)
+int BaseFont::calculateHeight(string s, double scaley)
 {
-    return charMap[0].height;
+    return charMap[0].height * scaley;
 }
 
 float BaseFont::drawChar(char c, float xpos, double scalex, double scaley)

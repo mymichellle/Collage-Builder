@@ -47,8 +47,19 @@ void TextElement::setText(string s)
 
 void TextElement::updateDimensions()
 {
-    width = Collage::sharedCollage().getFont()->calculateWidth(text);
-    height = Collage::sharedCollage().getFont()->calculateHeight(text);
+    width = Collage::sharedCollage().getFont()->calculateWidth(text, scaleX);
+    height = Collage::sharedCollage().getFont()->calculateHeight(text, scaleY);
+}
+
+void TextElement::updateSize()
+{
+    // Get the width and height for a scale of 1
+    double w = Collage::sharedCollage().getFont()->calculateWidth(text, 1);
+    double h = Collage::sharedCollage().getFont()->calculateHeight(text, 1);
+    
+    // Calcualte the new scale = NewDimension/OldDimensino
+    scaleX = width/w;
+    scaleY = height/h;
 }
 
 void TextElement::setFontSize(double s)
@@ -64,10 +75,9 @@ void TextElement::setFontScale(double w, double h)
     scaleY = h;
     updateDimensions();
 }
-/*
-void BaseElement::setWidth(int w, bool locked)
+
+void TextElement::setWidth(int w, bool locked)
 {
-    //cout<<"setWidth w = "<<w<<endl;
     if(locked)
     {
         cout<<"LOCKED"<<endl;
@@ -75,9 +85,10 @@ void BaseElement::setWidth(int w, bool locked)
         height = height*scale;
     }
     width = w;
+    updateSize();
 }
 
-void BaseElement::setHeight(int h, bool locked)
+void TextElement::setHeight(int h, bool locked)
 {
     if(locked)
     {
@@ -85,8 +96,9 @@ void BaseElement::setHeight(int h, bool locked)
         width = width * scale;
     }
     height = h;
+    updateSize();
 }
-*/
+
 
 void TextElement::drawElement()
 {  
