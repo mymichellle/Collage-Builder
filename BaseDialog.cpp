@@ -80,7 +80,8 @@ bool BaseDialog::mouseMotion(int xpos, int ypos)
     return true;
 }
 
-void BaseDialog::keyboard(unsigned char key, int x, int y)
+// Takes the user input from the keyboard returns true if a change was made
+bool BaseDialog::keyboard(unsigned char key, int x, int y)
 {
     if(active)
     {
@@ -106,7 +107,9 @@ void BaseDialog::keyboard(unsigned char key, int x, int y)
                 break;
         }
         glutPostRedisplay();
+        return true;
     }
+    return false;
 }
 
 void BaseDialog::draw()

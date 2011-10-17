@@ -35,7 +35,7 @@ public:
     BaseDialog(std::string t, std::string d, int centerX, int centerY, int w);
     bool mouse(int button, int state, int x, int y);
     bool mouseMotion(int x, int y);
-    void keyboard(unsigned char key, int x, int y);
+    bool keyboard(unsigned char key, int x, int y);
     void draw();
     std::string getValue();
     

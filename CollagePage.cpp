@@ -28,16 +28,25 @@ CollagePage::CollagePage()
     
     // Initialize the buttons and text boxes
     btn_back = new BaseButton("BACK", 75, 50);
-    btn_delete = new BaseButton("DELTE", WINDOW_WIDTH-75, 50);
-    btn_copy = new BaseButton("COPY", WINDOW_WIDTH-75, 150);
+    btn_delete = new BaseButton("DELTE", 75, 125);
+    btn_copy = new BaseButton("COPY", 75, 200);
     btn_lock = new ToggleButton("LOCK RATIO", 300, COLLAGE_MENU_HEIGHT - 70);
     btn_forward = new BaseButton("FORWARD", 300, COLLAGE_MENU_HEIGHT-125);
     btn_backward = new BaseButton("BACKWARD", 300, COLLAGE_MENU_HEIGHT - 180);
-    dialog_rotation = new BaseDialog("ROTATION: ", "0", 300, COLLAGE_MENU_HEIGHT - 225);
-    dialog_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-75);
-    dialog_green = new BaseDialog("GREEN: ", "0", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-125);
-    dialog_blue = new BaseDialog("BLUE: ", "0", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-175);
-    dialog_alpha = new BaseDialog("OPACITY: ", "255", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-225);
+    dialog_rotation = new BaseDialog("ROTATION: ", "0", 300, COLLAGE_MENU_HEIGHT - 225); 
+    
+    // RED
+    slider_red = new BaseSlider("RED:",WINDOW_WIDTH - 230, COLLAGE_MENU_HEIGHT-75, 0, 255);
+    dialog_red = new BaseDialog("", "0", WINDOW_WIDTH-70, COLLAGE_MENU_HEIGHT-75);
+    // GREEN
+    slider_green = new BaseSlider("GREEN:",WINDOW_WIDTH - 230, COLLAGE_MENU_HEIGHT-125, 0, 255);
+    dialog_green = new BaseDialog("", "0", WINDOW_WIDTH-70, COLLAGE_MENU_HEIGHT-125);
+    // BLUE
+    slider_blue = new BaseSlider("BLUE:",WINDOW_WIDTH - 230, COLLAGE_MENU_HEIGHT-175, 0, 255);
+    dialog_blue = new BaseDialog("", "0", WINDOW_WIDTH-70, COLLAGE_MENU_HEIGHT-175);
+    // ALPHA
+    slider_alpha = new BaseSlider("OPACITY:",WINDOW_WIDTH - 230, COLLAGE_MENU_HEIGHT-225, 0, 255);
+    dialog_alpha = new BaseDialog("", "255", WINDOW_WIDTH-70, COLLAGE_MENU_HEIGHT-225);
 }
 
 // Pass user input to the Collage Elements
@@ -51,6 +60,16 @@ void CollagePage::mouseMotion(int x, int y)
         // update the control panel
         updateControlPanel();
     }
+    
+    // Pass mouse movement to the sliders and update any changes
+    if(slider_red->mouseMotion(x,y))
+        dialog_red->setValue(slider_red->getValue());
+    if(slider_green->mouseMotion(x,y))
+        dialog_green->setValue(slider_green->getValue());
+    if(slider_blue->mouseMotion(x,y))
+        dialog_blue->setValue(slider_blue->getValue());
+    if(slider_alpha->mouseMotion(x,y))
+        dialog_alpha->setValue(slider_alpha->getValue());
 }
 
 // Pass user input to the Collage Elements
@@ -111,16 +130,35 @@ void CollagePage::mouse(int button, int state, int x, int y)
     dialog_green->mouse(button, state, x,y);
     dialog_alpha->mouse(button, state, x,y);
     dialog_rotation->mouse(button, state, x,y);
+    
+    
+    // Pass the mouse to the sliders
+    slider_red->mouse(button, state, x, y);
+    slider_green->mouse(button, state, x, y);
+    slider_blue->mouse(button, state, x, y);
+    slider_alpha->mouse(button, state, x, y);
 }
 
 // Pass user input to the dialog boxes
 void CollagePage::keyboard(unsigned char key, int x, int y)
 {
-    dialog_red->keyboard(key, x, y);
-    dialog_blue->keyboard(key, x, y);
-    dialog_green->keyboard(key, x, y);
-    dialog_alpha->keyboard(key, x, y);
     dialog_rotation->keyboard(key, x, y);
+    
+    // Update the red slider if the text box changes
+    if(dialog_red->keyboard(key, x, y))
+        slider_red->setValue(atof(dialog_red->getValue().c_str()));
+    
+    // Update the green slider if the text box changes
+    if(dialog_green->keyboard(key, x, y))
+        slider_green->setValue(atof(dialog_green->getValue().c_str()));
+    
+    // Update the blue slider if the text box changes
+    if(dialog_blue->keyboard(key, x, y))
+        slider_blue->setValue(atof(dialog_blue->getValue().c_str()));
+    
+    // Update the alpha slider if the text box changes
+    if(dialog_alpha->keyboard(key, x, y))
+        slider_alpha->setValue(atof(dialog_alpha->getValue().c_str()));
 }
 
 // Go back to the create page
@@ -202,6 +240,11 @@ void CollagePage::updateControlPanel()
         dialog_blue->setValue(color->color.blue * 255);
         dialog_alpha->setValue(color->color.alpha*255);
         btn_lock->setSelected(activeElement->getLockRatio());
+        
+        slider_red->setValue(color->color.red*255);
+        slider_green->setValue(color->color.green*255);
+        slider_blue->setValue(color->color.blue*255);
+        slider_alpha->setValue(color->color.alpha*255);
     }
 }
 
@@ -237,7 +280,7 @@ void CollagePage::display()
     Collage::sharedCollage().getFont()->draw(title, 0.75, .75);
     glPopMatrix();
     
-    // Draw buttons and text boxes
+    // Draw buttons and text boxes and sliders
     btn_back->draw();
     if(activeElement != NULL)
     {
@@ -251,6 +294,10 @@ void CollagePage::display()
         dialog_blue->draw();
         dialog_alpha->draw();
         dialog_rotation->draw();
+        slider_red->draw();
+        slider_green->draw();
+        slider_blue->draw();
+        slider_alpha->draw();
     }
     
     glFlush();

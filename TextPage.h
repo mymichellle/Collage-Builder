@@ -13,6 +13,7 @@
 #include "BaseButton.h"
 #include "BaseDialog.h"
 #include "TextElement.h"
+#include "BaseSlider.h"
 
 class TextPage: public BasePage
 {
@@ -33,12 +34,20 @@ private:
     BaseDialog *dialog_rotation;
     BaseDialog *dialog_size;
     
+    // Sliders
+    BaseSlider *slider_red;
+    BaseSlider *slider_green;
+    BaseSlider *slider_blue;
+    BaseSlider *slider_alpha;
+    
     // Button Responders
     void onSavePress();
     void onBackPress();
     
+    // Helper Function
     void defineTextElement();
     void setDefaultValues();
+    
 public:
     TextPage();
     

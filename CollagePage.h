@@ -11,24 +11,34 @@
 
 #include "BasePage.h"
 #include "BaseButton.h"
+#include "BaseSlider.h"
 #include "ToggleButton.h"
 #include "BaseDialog.h"
 #include "BaseElement.h"
 
 class CollagePage: public BasePage
 {
-    // Buttons and Text Boxes
+    // Buttons
     BaseButton *btn_back;
     BaseButton *btn_delete;
     BaseButton *btn_forward;
     BaseButton *btn_backward;
     ToggleButton *btn_lock;
     BaseButton *btn_copy;
+    
+    // Text Boxes
     BaseDialog *dialog_red;
     BaseDialog *dialog_green;
     BaseDialog *dialog_blue;
     BaseDialog *dialog_rotation;
     BaseDialog *dialog_alpha;
+    
+    
+    // Sliders
+    BaseSlider *slider_red;
+    BaseSlider *slider_green;
+    BaseSlider *slider_blue;
+    BaseSlider *slider_alpha;
     
     // Button callbacks
     void onBackPress();

@@ -10,7 +10,6 @@
 #define ToggleButton_h
 
 #include "BaseButton.h"
-#include <string>
 
 class ToggleButton: public BaseButton
 {
@@ -20,7 +19,11 @@ private:
     
 public:
     ToggleButton(std::string s, int xCord, int yCord);
+    
+    // User interaction
     bool mouse(int button, int state, int x, int y);
+    
+    // Getters and Setters
     void setSelected(bool s);
     bool getSelected(){return selected;};
 };
