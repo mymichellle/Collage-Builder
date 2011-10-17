@@ -5,6 +5,9 @@
 //  Created by Michelle Alexander on 9/23/11.
 //  Copyright 2011 ??? . All rights reserved.
 //
+//  Collage is a singleton that can be accessed throughout the program
+//  All user interactions are sent through the Collage to the active page
+//  All information about the collage's elements and default settings is stored here
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -15,6 +18,7 @@
 
 using namespace std;
 
+// One Collage is created when the application is run
 Collage::Collage()
 {
     // Set color to white
@@ -28,8 +32,8 @@ Collage::Collage()
     mainFont = new BaseFont(0);
     
     // Initialize default values
-    setDefaultValues(BaseElement::IMAGE_ELEMENT, 100,100,1,0,new BaseColor(0,0,0,0));
-    setDefaultValues(BaseElement::TEXT_ELEMENT, 1,1,1,0,new BaseColor(0,0,0,0));
+    setDefaultValues(BaseElement::IMAGE_ELEMENT, 100,100,1,0,new BaseColor(1,1,1,1));
+    setDefaultValues(BaseElement::TEXT_ELEMENT, 1,1,1,0,new BaseColor(0,0,0,1));
     
     numElements = 0;
     created = false;
@@ -41,26 +45,31 @@ void Collage::display(void)
     displayPage->display();
 }
 
+// Ability to modify the reshape function
 void Collage::reshape(int w, int h)
 {
 
 }
 
+// Pass mouse press activities to the active page
 void Collage::mouse(int button, int state, int x, int y) 
 {
     displayPage->mouse(button, state, x, y);
 }
 
+// Pass mouseMotion activites to the active page
 void Collage::mouseMotion(int x, int y)
 {
     displayPage->mouseMotion(x,y);
 }
 
+// Pass Keyboard activites to the active page
 void Collage::keyboard(unsigned char key, int x, int y)
 {
     displayPage->keyboard(key,x,y);
 }
 
+// Change the Active Page
 void Collage::setDisplayPage(BasePage *newPage)
 {
     displayPage->cleanUp();
@@ -69,6 +78,7 @@ void Collage::setDisplayPage(BasePage *newPage)
     glutPostRedisplay();
 }
 
+// Reset the collage remove all old elements and change the name
 void Collage::createNewCollage(string n)
 {
     // Assign the new name
@@ -82,14 +92,15 @@ void Collage::createNewCollage(string n)
     numElements = 0;
     
     // Reset default values
-    setDefaultValues(BaseElement::IMAGE_ELEMENT, 100,100,1,0,new BaseColor(1,1,1,.75f));
-    setDefaultValues(BaseElement::TEXT_ELEMENT, 1,1,1,0,new BaseColor(0,0,0,0));
+    setDefaultValues(BaseElement::IMAGE_ELEMENT, 100,100,1,0,new BaseColor(1,1,1,1));
+    setDefaultValues(BaseElement::TEXT_ELEMENT, 1,1,1,0,new BaseColor(0,0,0,1));
     
     // Reset states
     created = true;
     randomized = false;
 }
 
+// To begin a collage set the default values
 void Collage::setDefaultValues(enum BaseElement::Type t, int w, int h, double s, float r, BaseColor *c)
 {
     if(t == BaseElement::IMAGE_ELEMENT)
@@ -110,6 +121,7 @@ void Collage::setDefaultValues(enum BaseElement::Type t, int w, int h, double s,
     }
 }
 
+// Add an element to the collage
 bool Collage::addElement(BaseElement *elem)
 {
     if(numElements < MAX_ELEMENTS)
@@ -122,6 +134,7 @@ bool Collage::addElement(BaseElement *elem)
         return false;
 }
 
+// remove an element
 bool Collage::removeElement(BaseElement *elem)
 {
     bool found = false;
@@ -146,6 +159,9 @@ bool Collage::removeElement(BaseElement *elem)
     return found;
 }
 
+// move an element forward in the z direction
+// note all elements are technically on the same z plane this 
+// just changes the order they are drawn in
 bool Collage::moveElementForward(BaseElement *elem)
 {
     int index = getZValue(elem);
@@ -162,6 +178,10 @@ bool Collage::moveElementForward(BaseElement *elem)
     }
         
 }
+
+// move an element backward in the z direction
+// note all elements are technically on the same z plane this 
+// just changes the order they are drawn in
 bool Collage::moveElementBackward(BaseElement *elem)
 {
     int index = getZValue(elem);
@@ -179,6 +199,7 @@ bool Collage::moveElementBackward(BaseElement *elem)
     
 }
 
+// Get the z order of the element
 int Collage::getZValue(BaseElement *elem)
 {
     int z = -1;
@@ -190,6 +211,7 @@ int Collage::getZValue(BaseElement *elem)
     return z;
 }
 
+// Initialize the collages display
 void Collage::setupCollage()
 {
     // If this is the first time the collage is displayed
@@ -202,15 +224,20 @@ void Collage::setupCollage()
         {
             // generate a random position at least 50 pixels away from the edges
             elements[i]->setPosition(rand() % (COLLAGE_DISPLAY_WIDTH - 100) + 50, rand()%(COLLAGE_DISPLAY_HEIGHT - 100)+50);
+        
+            // update the elements bounds
+            elements[i]->updateBounds();
         }
     }
 }
 
+// Draw the elements with zero offset
 void Collage::drawElements()
 {
     drawElements(0,0);
 }
 
+// Draw the elements with an offset
 void Collage::drawElements(int offsetX, int offsetY)
 {
     
@@ -221,21 +248,25 @@ void Collage::drawElements(int offsetX, int offsetY)
     }
 }
 
+// Return the number of elements
 int Collage::getNumberOfElements()
 {
     return numElements;
 }
 
+// Get the element at z index
 BaseElement* Collage::getElement(int index)
 {
     return elements[index];
 }
 
+// Get the active font to write words to the screen
 BaseFont* Collage::getFont()
 {
     return mainFont;
 }
 
+// Access the default rotation set on the settings page
 float Collage::getDefaultRotation(enum BaseElement::Type t)
 {
     if(t == BaseElement::IMAGE_ELEMENT)
@@ -246,6 +277,7 @@ float Collage::getDefaultRotation(enum BaseElement::Type t)
         return 0;
 }
 
+// Access the default color set on the settings page
 BaseColor* Collage::getDefaultColor(enum BaseElement::Type t)
 {
     if(t == BaseElement::IMAGE_ELEMENT)
@@ -256,6 +288,7 @@ BaseColor* Collage::getDefaultColor(enum BaseElement::Type t)
         return new BaseColor(0,0,0,1);
 }
 
+// Access the default size set on the settings page
 double Collage::getDefaultSize(enum BaseElement::Type t)
 {
     if(t == BaseElement::IMAGE_ELEMENT)
@@ -266,6 +299,7 @@ double Collage::getDefaultSize(enum BaseElement::Type t)
         return 0;
 }
 
+// Access the default width set on the settings page
 int Collage::getDefaultWidth(enum BaseElement::Type t)
 {
     if(t == BaseElement::IMAGE_ELEMENT)
@@ -276,6 +310,7 @@ int Collage::getDefaultWidth(enum BaseElement::Type t)
         return 0;
 }
 
+// access the default height set on the settings page
 int Collage::getDefaultHeight(enum BaseElement::Type t)
 {
     if(t == BaseElement::IMAGE_ELEMENT)
@@ -286,11 +321,13 @@ int Collage::getDefaultHeight(enum BaseElement::Type t)
         return 0;
 }
 
+// Check if there is an active collage
 bool Collage::isCreated()
 {
     return created;
 }
 
+// Get the name of the active Collage
 string Collage::getName()
 {
     return name;

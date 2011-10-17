@@ -1,1 +1,7 @@
-You will need to install the GLUI Framework, double click on the file "GLUI Framework" and hit yes through the setup
+Michelle Alexander
+Computer Graphics (CS4300)
+Assignment 3
+2D Project
+
+To Build:
+./buildscript

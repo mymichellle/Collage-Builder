@@ -23,10 +23,10 @@ CreatePage::CreatePage()
 {    
     title = "Create A Collage";
     
-    btn_text = new BaseButton("TEXT", WINDOW_WIDTH/2, WINDOW_HEIGHT - 150);
-    btn_image = new BaseButton("IMAGE", WINDOW_WIDTH/2, WINDOW_HEIGHT - 250);
-    btn_settings = new BaseButton("SETTINGS", WINDOW_WIDTH/2, WINDOW_HEIGHT - 350);
-    btn_collage = new BaseButton("COLLAGE", WINDOW_WIDTH/2, WINDOW_HEIGHT - 450);
+    btn_text = new BaseButton("TEXT", WINDOW_WIDTH/2, WINDOW_HEIGHT - 200);
+    btn_image = new BaseButton("IMAGE", WINDOW_WIDTH/2, WINDOW_HEIGHT - 300);
+    btn_settings = new BaseButton("SETTINGS", WINDOW_WIDTH/2, WINDOW_HEIGHT - 400);
+    btn_collage = new BaseButton("COLLAGE", WINDOW_WIDTH/2, WINDOW_HEIGHT - 500);
     btn_back = new BaseButton("BACK", 100, 70);
 }
 
@@ -75,9 +75,12 @@ void CreatePage::display()
     glPushMatrix();
     
     // Draw the title
-    glColor3f(0, 0, 0);
-    glRasterPos3f(getMainTitleX(title), getMainTitleY(title), 0.5);    
-    displayString(title);
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+    int w = Collage::sharedCollage().getFont()->calculateWidth(title,1);
+    glTranslatef((WINDOW_WIDTH-w)/2, WINDOW_HEIGHT - 100, 0);
+    Collage::sharedCollage().getFont()->draw(title);
+    glPopMatrix();
     
     // Draw the buttons
     btn_text->draw();

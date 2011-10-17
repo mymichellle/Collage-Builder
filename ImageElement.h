@@ -16,13 +16,23 @@
 class ImageElement: public BaseElement
 {
 private:
+    // Texture
     GLuint tex_2d;
+    std::string fileName;
     
+    // Initialize states
+    void initialize();
+    
+    // Display
     void drawElement();
     
 public:
     ImageElement(std::string s, int w, int h);
+    ImageElement(ImageElement *copy);
+    
+    // Getters and Setters
     void setImage(std::string s);
+    std::string getFileName(){return fileName;};
 };
 
 #endif

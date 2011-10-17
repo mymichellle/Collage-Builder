@@ -25,18 +25,18 @@ ImagePage::ImagePage()
     // Initialize the element being defined
     element = new ImageElement(fileName,0,0);
     
-    btn_save = new BaseButton("SAVE", WINDOW_WIDTH-75, WINDOW_HEIGHT - 50);
-    btn_back = new BaseButton("BACK", 75, WINDOW_HEIGHT - 50);
-    btn_load = new BaseButton("LOAD", WINDOW_WIDTH/2, WINDOW_HEIGHT - 150);
+    btn_save = new BaseButton("SAVE", WINDOW_WIDTH-75, 50);
+    btn_back = new BaseButton("BACK", 75,  50);
+    btn_load = new BaseButton("LOAD", WINDOW_WIDTH/2, WINDOW_HEIGHT - 200);
     
-    dialog_file = new BaseDialog("FILE: ", fileName, WINDOW_WIDTH/2, WINDOW_HEIGHT-100, 200);
-    dialog_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-200);
-    dialog_green = new BaseDialog("GREEN: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-250);
-    dialog_blue = new BaseDialog("BLUE: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-300);
-    dialog_alpha = new BaseDialog("OPACITY: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-350);
-    dialog_width = new BaseDialog("WIDTH: ", "100", 200, WINDOW_HEIGHT-200);
-    dialog_height = new BaseDialog("HEIGHT: ", "100", 200, WINDOW_HEIGHT-250);
-    dialog_rotation = new BaseDialog("ROTATION: ", "0",200, WINDOW_HEIGHT-300);
+    dialog_file = new BaseDialog("FILE: ", fileName, WINDOW_WIDTH/2, WINDOW_HEIGHT-150, 200);
+    dialog_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-300);
+    dialog_green = new BaseDialog("GREEN: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-350);
+    dialog_blue = new BaseDialog("BLUE: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-400);
+    dialog_alpha = new BaseDialog("OPACITY: ", "255", WINDOW_WIDTH-150, WINDOW_HEIGHT-450);
+    dialog_width = new BaseDialog("WIDTH: ", "100", 200, WINDOW_HEIGHT-250);
+    dialog_height = new BaseDialog("HEIGHT: ", "100", 200, WINDOW_HEIGHT-300);
+    dialog_rotation = new BaseDialog("ROTATION: ", "0",200, WINDOW_HEIGHT-350);
     
 
     // Load the default values
@@ -136,9 +136,30 @@ void ImagePage::display()
     glPushMatrix();
     
     // Draw the title
-    glColor3f(0, 0, 0);
-    glRasterPos3f(getMainTitleX(title), getMainTitleY(title), 0.5);    
-    displayString(title);
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+    int w = Collage::sharedCollage().getFont()->calculateWidth(title,1);
+    glTranslatef((WINDOW_WIDTH-w)/2, WINDOW_HEIGHT - 100, 0);
+    Collage::sharedCollage().getFont()->draw(title);
+    glPopMatrix();
+    
+    // Draw the header
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+    // translate into place
+    glTranslatef(WINDOW_WIDTH/2, WINDOW_HEIGHT - 270, 0);
+    // scale text to .6
+    Collage::sharedCollage().getFont()->draw("Color Overlay:", .6,.6);
+    glPopMatrix();
+    
+    // Draw the header
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+    // translate into place
+    glTranslatef(50, 200, 0);
+    // scale text to .75
+    Collage::sharedCollage().getFont()->draw("Preview:", .6,.6);
+    glPopMatrix();
     
     // Draw buttons
     btn_save->draw();

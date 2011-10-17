@@ -17,31 +17,38 @@
 class TextPage: public BasePage
 {
 private:
+    // Element being created
     TextElement *element;
     
+    // Buttons
     BaseButton *btn_save;
     BaseButton *btn_back;
     
+    // Text Entry Boxes
     BaseDialog *dialog_text;
     BaseDialog *dialog_red;
     BaseDialog *dialog_green;
     BaseDialog *dialog_blue;
+    BaseDialog *dialog_alpha;
     BaseDialog *dialog_rotation;
     BaseDialog *dialog_size;
     
+    // Button Responders
     void onSavePress();
     void onBackPress();
     
     void defineTextElement();
     void setDefaultValues();
-
 public:
     TextPage();
+    
+    // User Interaction
     void mouse(int button, int state, int x, int y);
     void mouseMotion(int x, int y);
     void keyboard(unsigned char key, int x, int y);
-    void display();
     
+    // Display
+    void display();
 };
 
 #endif

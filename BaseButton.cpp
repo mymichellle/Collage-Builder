@@ -14,7 +14,7 @@ using namespace std;
 
 BaseButton::BaseButton(string s, int xCord, int yCord)
 {
-    width = 100;
+    width = 120;
     height = 50;
     
     // xCord and yCord represent the center of the button
@@ -24,8 +24,8 @@ BaseButton::BaseButton(string s, int xCord, int yCord)
     
     label = s;
     
-    fillColor = new BaseColor(0,0,0,1);
-    selectColor = new BaseColor(0.5,0.5,0.5,1);
+    fillColor = new BaseColor(0, 0, .4, 1);
+    selectColor = new BaseColor(0.5,0.5,0.7,1);
     fontColor = new BaseColor(1,1,1,1);
     
     selected = false;
@@ -82,8 +82,26 @@ void BaseButton::draw()
         glColor3f(fillColor->color.red, fillColor->color.green, fillColor->color.blue);
     
     // Draw the button
-    glPointSize(1);
+    glPointSize(3);
     glRectf(x, y, x+width, y+height);
+    
+    // Make the button look 3D
+    glLineWidth(3);
+    if(selected)
+        glColor3f(1,1,1);
+    else
+        glColor3f(0,0,0);
+    
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(x, y); 
+    glVertex2f(x+width, y);
+    if(selected)
+        glColor3f(0,0,0);
+    else
+        glColor3f(selectColor->color.red, selectColor->color.green, selectColor->color.blue);
+    glVertex2f(x+width, y+height);
+    glVertex2f(x, y+height);
+    glEnd();
     
     // Set the label color
     glColor3f(fontColor->color.red, fontColor->color.green, fontColor->color.blue);

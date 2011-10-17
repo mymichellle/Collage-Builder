@@ -22,18 +22,19 @@ TextPage::TextPage()
 {    
     title = "Text";
     
-    btn_save = new BaseButton("SAVE", WINDOW_WIDTH-75, WINDOW_HEIGHT - 50);
-    btn_back = new BaseButton("BACK", 75, WINDOW_HEIGHT - 50);
+    btn_save = new BaseButton("SAVE", WINDOW_WIDTH-75, 50);
+    btn_back = new BaseButton("BACK", 75,  50);
     
-    dialog_text = new BaseDialog("TEXT: ", "caption", WINDOW_WIDTH/2, WINDOW_HEIGHT-100);
-    dialog_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-150);
-    dialog_green = new BaseDialog("GREEN: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-200);
-    dialog_blue = new BaseDialog("BLUE: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-250);
+    dialog_text = new BaseDialog("TEXT: ", "caption", WINDOW_WIDTH/2, WINDOW_HEIGHT-125, 200);
+    dialog_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-200);
+    dialog_green = new BaseDialog("GREEN: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-250);
+    dialog_blue = new BaseDialog("BLUE: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-300);
+    dialog_alpha = new BaseDialog("OPACITY: ", "255", WINDOW_WIDTH-150, WINDOW_HEIGHT-350);
     dialog_size = new BaseDialog("SIZE: ", "1", 200, WINDOW_HEIGHT-200);
     dialog_rotation = new BaseDialog("ROTATION: ", "0",200, WINDOW_HEIGHT-250);
     
     // Initialize the element being defined
-    element = new TextElement(dialog_text->getValue(),150,10);
+    element = new TextElement(dialog_text->getValue(),200,100);
     
     // Load default values
     setDefaultValues();
@@ -47,6 +48,7 @@ void TextPage::setDefaultValues()
     dialog_red->setValue(color->color.red*255);
     dialog_green->setValue(color->color.green*255);
     dialog_blue->setValue(color->color.blue*255);
+    dialog_alpha->setValue(color->color.alpha*255);
     dialog_size->setValue(Collage::sharedCollage().getDefaultSize(BaseElement::TEXT_ELEMENT));
     dialog_rotation->setValue(Collage::sharedCollage().getDefaultRotation(BaseElement::TEXT_ELEMENT));
 }
@@ -63,6 +65,7 @@ void TextPage::mouse(int button, int state, int x, int y)
     dialog_red->mouse(button, state, x, y);
     dialog_blue->mouse(button, state, x,y);
     dialog_green->mouse(button, state, x,y);
+    dialog_alpha->mouse(button, state, x,y);
     dialog_size->mouse(button, state, x, y);
     dialog_rotation->mouse(button, state, x,y);
 }
@@ -79,6 +82,7 @@ void TextPage::keyboard(unsigned char key, int x, int y)
     dialog_red->keyboard(key, x, y);
     dialog_blue->keyboard(key, x, y);
     dialog_green->keyboard(key, x, y);
+    dialog_alpha->keyboard(key, x, y);
     dialog_size->keyboard(key, x, y);
     dialog_rotation->keyboard(key, x, y);
 }
@@ -98,9 +102,10 @@ void TextPage::onBackPress()
 void TextPage::defineTextElement()
 {
     element->setText(dialog_text->getValue().c_str());
-    element->setColor(atof(dialog_red->getValue().c_str())/255, 
+    element->setColor4(atof(dialog_red->getValue().c_str())/255, 
                       atof(dialog_green->getValue().c_str())/255,
-                      atof(dialog_blue->getValue().c_str())/255);
+                       atof(dialog_blue->getValue().c_str())/255,
+                       atof(dialog_alpha->getValue().c_str())/255);
     element->setRotation(atof(dialog_rotation->getValue().c_str()));
     element->setFontSize(atof(dialog_size->getValue().c_str()));
 }
@@ -113,9 +118,21 @@ void TextPage::display()
     glPushMatrix();
     
     // Draw the title
-    glColor3f(0, 0, 0);
-    glRasterPos3f(getMainTitleX(title), getMainTitleY(title), 0.5);    
-    displayString(title);
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+    int w = Collage::sharedCollage().getFont()->calculateWidth(title,1);
+    glTranslatef((WINDOW_WIDTH-w)/2, WINDOW_HEIGHT - 100, 0);
+    Collage::sharedCollage().getFont()->draw(title);
+    glPopMatrix();
+    
+    // Draw the header
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+    // translate into place
+    glTranslatef(50, 200, 0);
+    // scale text to .75
+    Collage::sharedCollage().getFont()->draw("Preview:", .6,.6);
+    glPopMatrix();
     
     // Draw buttons
     btn_save->draw();
@@ -126,6 +143,7 @@ void TextPage::display()
     dialog_red->draw();
     dialog_blue->draw();
     dialog_green->draw();
+    dialog_alpha->draw();
     dialog_size->draw();
     dialog_rotation->draw();
     

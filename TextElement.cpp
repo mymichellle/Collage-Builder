@@ -16,6 +16,7 @@ using namespace std;
 
 TextElement::TextElement(string s, int centerX, int centerY)
 {
+    // Properties
     elementType = TEXT_ELEMENT;
     text = s;
     width = 1;
@@ -24,6 +25,31 @@ TextElement::TextElement(string s, int centerX, int centerY)
     y = centerY - height/2;
     color = new BaseColor(0,0,0,0);
     rotation = 0;
+    
+    // Initialize states
+    initialize();
+}
+
+TextElement::TextElement(TextElement *copy)
+{
+    // Copy Properties
+    elementType = TEXT_ELEMENT;
+    text = copy->getText();
+    width = copy->getWidth();
+    height = copy->getHeight();
+    x = copy->getX()+1;// offset the copy
+    y = copy->getY()+1;// offset the copy
+    rotation = copy->getRotation();
+    BaseColor *cColor = copy->getColor();
+    color = new BaseColor(cColor->color.red, cColor->color.green, cColor->color.blue, cColor->color.alpha);
+
+    // Initialize states
+    initialize();
+}
+
+void TextElement::initialize()
+{
+    // Create Bounds
     bounds = new BoundingBox(x, y, width, height, rotation);
     
     // Movement properties

@@ -80,22 +80,36 @@ void BaseElement::setLockRatio(bool lock)
 {
     lockRatio = lock;
 }
+/*
+int BaseElement::getX()
+{
+    return x;
+}
 
+int BaseElement::getY()
+{
+    return y;
+}
+*/
+// Return the width
 int BaseElement::getWidth()
 {
     return width;
 }
 
+// Return the height
 int BaseElement::getHeight()
 {
     return height;
 }
 
+// Return the rotation
 float BaseElement::getRotation()
 {
     return rotation;
 }
 
+// Return if the element's aspect ratio is locked
 bool BaseElement::getLockRatio()
 {
     return lockRatio;
@@ -108,7 +122,6 @@ BaseColor* BaseElement::getColor()
 
 void BaseElement::deselect()
 {
-    cout<<"Deselect "<<endl;
     selected = false;
     rotateable = false;
     moveable = false;
@@ -257,7 +270,7 @@ void BaseElement::draw()
             glRotatef(rotation, 0, 0, 1);
             
             // Set the color of the element
-            glColor3f(color->color.red,color->color.green,color->color.blue);
+            glColor4f(color->color.red,color->color.green,color->color.blue, color->color.alpha);
             glPointSize(1);
             
             // Draw the Element

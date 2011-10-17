@@ -20,8 +20,8 @@ SettingsPage::SettingsPage()
 {    
     title = "Settings";
     
-    btn_save = new BaseButton("SAVE", WINDOW_WIDTH-75, WINDOW_HEIGHT - 50);
-    btn_back = new BaseButton("BACK", 75, WINDOW_HEIGHT - 50);
+    btn_save = new BaseButton("SAVE", WINDOW_WIDTH-75, 50);
+    btn_back = new BaseButton("BACK", 75,  50);
     
     // Text Settings
     dialog_text_red = new BaseDialog("RED: ", "0", WINDOW_WIDTH-150, WINDOW_HEIGHT-150);
@@ -139,19 +139,30 @@ void SettingsPage::display()
     glPushMatrix();
     
     // Draw the title
-    glColor3f(0, 0, 0);
-    glRasterPos3f(getMainTitleX(title), getMainTitleY(title), 0.5);    
-    displayString(title);
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+    int w = Collage::sharedCollage().getFont()->calculateWidth(title,1);
+    glTranslatef((WINDOW_WIDTH-w)/2, WINDOW_HEIGHT - 100, 0);
+    Collage::sharedCollage().getFont()->draw(title);
+    glPopMatrix();
     
     // Draw the header
-    glColor3f(0, 0, 0);
-    glRasterPos3f(10, WINDOW_HEIGHT-100, 0.5);    
-    displayString("Text Defaults:");
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+        // translate into place
+        glTranslatef(10, WINDOW_HEIGHT - 150, 0);
+        // scale text to .6
+        Collage::sharedCollage().getFont()->draw("Text Defaults:", .6,.6);
+    glPopMatrix();
     
     // Draw the header
-    glColor3f(0, 0, 0);
-    glRasterPos3f(10, WINDOW_HEIGHT/2, 0.5);    
-    displayString("Image Defaults");
+    glColor3f(0, 0, .4);
+    glPushMatrix();
+        // translate into place
+        glTranslatef(10, WINDOW_HEIGHT/2 - 25, 0);  
+        // scale text to .6  
+        Collage::sharedCollage().getFont()->draw("Image Defaults:", .6,.6);
+    glPopMatrix();
     
     // Draw buttons
     btn_back->draw();

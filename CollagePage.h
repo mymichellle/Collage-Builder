@@ -16,23 +16,28 @@
 
 class CollagePage: public BasePage
 {
+    // Buttons and Text Boxes
     BaseButton *btn_back;
     BaseButton *btn_delete;
     BaseButton *btn_forward;
     BaseButton *btn_backward;
     BaseButton *btn_lock;
+    BaseButton *btn_copy;
     BaseDialog *dialog_red;
     BaseDialog *dialog_green;
     BaseDialog *dialog_blue;
     BaseDialog *dialog_rotation;
+    BaseDialog *dialog_alpha;
     
-    
+    // Button callbacks
     void onBackPress();
     void onDeletePress();
+    void onCopyPress();
     void onForwardPress();
     void onBackwardPress();
     void onLockPress();
     
+    // Private Helper functions
     BaseElement *activeElement;
     void updateActiveElement();
     void updateControlPanel();

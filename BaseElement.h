@@ -89,7 +89,6 @@ protected:
     int width;
     int height;
     BoundingBox *bounds;
-    void updateBounds();
     
     // Properties
     BaseColor *color;
@@ -127,6 +126,7 @@ protected:
 public:
     BaseElement();
     
+    // Setters
     void setPosition(int xpos, int ypos);
     virtual void setWidth(int w);
     virtual void setHeight(int h);
@@ -136,15 +136,22 @@ public:
     void setLockRatio(bool lock);
     void deselect();
     
+    // Getters
+    enum Type getElementType(){return elementType;};
+    int getX(){return x;};
+    int getY(){return y;};
     int getWidth();
     int getHeight();
     float getRotation();
     bool getLockRatio();
     BaseColor* getColor();
     
+    // User interactions
     bool mouse(int button, int state, int xpops, int ypos);
     bool mouseMotion(int xpos, int ypos);
+    void updateBounds();
     
+    // Display
     void draw();
 };
 

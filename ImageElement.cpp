@@ -12,16 +12,51 @@
 
 using namespace std;
 
+// Create a new ImageElement
 ImageElement::ImageElement(string s, int xpos, int ypos)
 {
+    // Set Properties
+    fileName = s;
     elementType = IMAGE_ELEMENT;
     x = xpos;
     y = ypos;
     z = 0;
     width = 256;
     height = 256;
-    color = new BaseColor(0,0,0,.75);
+    color = new BaseColor(1,1,1,1);
     rotation = 0;
+
+    // initialize bounds and states load image
+    initialize();
+    setImage(fileName);
+}
+
+// Create a copy of an Image Element
+ImageElement::ImageElement(ImageElement *copy)
+{
+    // Copy Properties
+    fileName = copy->getFileName();
+    elementType = IMAGE_ELEMENT;
+    x = copy->getX() + 1; // offset the new copy
+    y = copy->getY() + 1; // offset the new copy
+    z = 0;
+    width = copy->getWidth();
+    height = copy->getHeight();
+    BaseColor *cColor = copy->getColor();
+    color = new BaseColor(cColor->color.red, cColor->color.green, cColor->color.blue, cColor->color.alpha);
+    rotation = copy->getRotation();
+    setImage(fileName);
+    // Reset width and height because this value is changed to the images default
+    width = copy->getWidth();
+    height = copy->getHeight();
+    
+    // initialize bounds and states load image
+    initialize();
+}
+
+void ImageElement::initialize()
+{
+    // Set the bounds
     bounds = new BoundingBox(x, y, width, height, rotation);
     
     // Movement properties
@@ -33,9 +68,6 @@ ImageElement::ImageElement(string s, int xpos, int ypos)
     
     // Initialize the corners
     selectedCorner = CNONE;
-
-    setImage(s);
-        
 }
 
 void ImageElement::setImage(string s)
@@ -69,12 +101,10 @@ void ImageElement::setImage(string s)
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
     
-    cout<<"Create a texture from "<<s<< endl;
     glTexImage2D(GL_TEXTURE_2D, 0,
                  GL_RGBA, width, height, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, result );
     
-    cout<<"texture created from "<<s<< endl;
     // get rid of img data
 	stbi_image_free(result);
 }
