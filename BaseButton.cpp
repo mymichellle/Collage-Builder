@@ -12,10 +12,15 @@
 
 using namespace std;
 
+BaseButton::BaseButton()
+{
+    
+}
+
 BaseButton::BaseButton(string s, int xCord, int yCord)
 {
-    width = 120;
-    height = 50;
+    width = BUTTON_WIDTH;
+    height = BUTTON_HEIGHT;
     
     // xCord and yCord represent the center of the button
     // convert to lower left corner

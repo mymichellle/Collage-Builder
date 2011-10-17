@@ -30,7 +30,7 @@ CollagePage::CollagePage()
     btn_back = new BaseButton("BACK", 75, 50);
     btn_delete = new BaseButton("DELTE", WINDOW_WIDTH-75, 50);
     btn_copy = new BaseButton("COPY", WINDOW_WIDTH-75, 150);
-    btn_lock = new BaseButton("LOCK RATIO", 300, COLLAGE_MENU_HEIGHT - 70);
+    btn_lock = new ToggleButton("LOCK RATIO", 300, COLLAGE_MENU_HEIGHT - 70);
     btn_forward = new BaseButton("FORWARD", 300, COLLAGE_MENU_HEIGHT-125);
     btn_backward = new BaseButton("BACKWARD", 300, COLLAGE_MENU_HEIGHT - 180);
     dialog_rotation = new BaseDialog("ROTATION: ", "0", 300, COLLAGE_MENU_HEIGHT - 225);
@@ -40,6 +40,7 @@ CollagePage::CollagePage()
     dialog_alpha = new BaseDialog("OPACITY: ", "255", WINDOW_WIDTH-200, COLLAGE_MENU_HEIGHT-225);
 }
 
+// Pass user input to the Collage Elements
 void CollagePage::mouseMotion(int x, int y)
 {
     // Pass mouse press to elements moving (0,0) to above the control panel
@@ -52,6 +53,7 @@ void CollagePage::mouseMotion(int x, int y)
     }
 }
 
+// Pass user input to the Collage Elements
 void CollagePage::mouse(int button, int state, int x, int y)
 {
     // Pass mouse movements to the elements if the mouse is in the collage display
@@ -111,6 +113,7 @@ void CollagePage::mouse(int button, int state, int x, int y)
     dialog_rotation->mouse(button, state, x,y);
 }
 
+// Pass user input to the dialog boxes
 void CollagePage::keyboard(unsigned char key, int x, int y)
 {
     dialog_red->keyboard(key, x, y);
@@ -120,11 +123,13 @@ void CollagePage::keyboard(unsigned char key, int x, int y)
     dialog_rotation->keyboard(key, x, y);
 }
 
+// Go back to the create page
 void CollagePage::onBackPress()
 {
     Collage::sharedCollage().setDisplayPage(new CreatePage());
 }
 
+// Delete the active element
 void CollagePage::onDeletePress()
 {
     if(activeElement != NULL)
@@ -134,41 +139,45 @@ void CollagePage::onDeletePress()
     }
 }
 
+// Copy the active element
 void CollagePage::onCopyPress()
 {
     if(activeElement != NULL)
     {
+        // Create the correct type IMAGE or TEXT
         if(activeElement->getElementType() == BaseElement::IMAGE_ELEMENT)
         {
-            cout << "Copy Image"<<endl;
             Collage::sharedCollage().addElement(new ImageElement((ImageElement*)activeElement));
         }
         else if(activeElement->getElementType() == BaseElement::TEXT_ELEMENT)
         {
-            cout << "Copy Text"<<endl;
             Collage::sharedCollage().addElement(new TextElement((TextElement*)activeElement));
         }
     }
 }
 
+// Move the active element forward one level at a time
 void CollagePage::onForwardPress()
 {
     if(activeElement != NULL)
         Collage::sharedCollage().moveElementForward(activeElement);
 }
 
+// Move the active element object backward one level at a time
 void CollagePage::onBackwardPress()
 {
     if(activeElement != NULL)
         Collage::sharedCollage().moveElementBackward(activeElement);
 }
 
+// Lock / Unlock the aspect ratio of the active element
 void CollagePage::onLockPress()
 {
     if(activeElement != NULL)
-        activeElement->setLockRatio(!activeElement->getLockRatio());
+        activeElement->setLockRatio(btn_lock->getSelected());
 }
 
+// Update the active element based on the control panel
 void CollagePage::updateActiveElement()
 {
     if(activeElement != NULL)
@@ -192,9 +201,11 @@ void CollagePage::updateControlPanel()
         dialog_green->setValue(color->color.green * 255);
         dialog_blue->setValue(color->color.blue * 255);
         dialog_alpha->setValue(color->color.alpha*255);
+        btn_lock->setSelected(activeElement->getLockRatio());
     }
 }
 
+// Draw the Collage
 void CollagePage::display()
 {
     glPushMatrix();

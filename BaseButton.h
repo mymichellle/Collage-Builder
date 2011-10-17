@@ -9,6 +9,9 @@
 #ifndef BaseButton_h
 #define BaseButton_h
 
+#define BUTTON_WIDTH 120
+#define BUTTON_HEIGHT 50
+
 #include <string>
 #include "Utility.h"
 
@@ -28,8 +31,9 @@ protected:
     bool pointInBounds(int xCord, int yCord);
     
 public:
+    BaseButton();
     BaseButton(std::string s, int xCord, int yCord);
-    bool mouse(int button, int state, int x, int y);
+    virtual bool mouse(int button, int state, int x, int y);
     void draw();
 };
 

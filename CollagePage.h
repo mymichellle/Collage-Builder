@@ -11,6 +11,7 @@
 
 #include "BasePage.h"
 #include "BaseButton.h"
+#include "ToggleButton.h"
 #include "BaseDialog.h"
 #include "BaseElement.h"
 
@@ -21,7 +22,7 @@ class CollagePage: public BasePage
     BaseButton *btn_delete;
     BaseButton *btn_forward;
     BaseButton *btn_backward;
-    BaseButton *btn_lock;
+    ToggleButton *btn_lock;
     BaseButton *btn_copy;
     BaseDialog *dialog_red;
     BaseDialog *dialog_green;
